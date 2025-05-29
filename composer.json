@@ -5,6 +5,8 @@
   "license": "MIT",
   "require": {
     "php": "^8.1",
+    "ext-mbstring": "*",
+    "alibabacloud/darabonba-openapi": "^0.2.14",
     "alibabacloud/vod-20170321": "^3.7",
     "doctrine/data-fixtures": "^2.0",
     "doctrine/dbal": "^4.0",
