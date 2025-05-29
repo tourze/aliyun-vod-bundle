@@ -18,7 +18,7 @@ class Video implements \Stringable
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
-    private readonly int $id;
+    private int $id = 0;
 
     #[ORM\ManyToOne(targetEntity: AliyunVodConfig::class)]
     #[ORM\JoinColumn(nullable: false, options: ['comment' => '关联的阿里云配置'])]

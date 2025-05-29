@@ -18,7 +18,7 @@ class AliyunVodConfig implements \Stringable
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
-    private readonly int $id;
+    private int $id = 0;
 
     #[ORM\Column(type: Types::STRING, length: 100, options: ['comment' => '配置名称'])]
     private string $name;

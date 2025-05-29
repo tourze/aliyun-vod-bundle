@@ -17,7 +17,7 @@ class PlayRecord implements \Stringable
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
-    private readonly int $id;
+    private int $id = 0;
 
     #[ORM\ManyToOne(targetEntity: Video::class)]
     #[ORM\JoinColumn(nullable: false, options: ['comment' => '关联的视频'])]
