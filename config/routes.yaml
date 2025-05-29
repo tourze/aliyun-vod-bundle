@@ -1,0 +1,11 @@
+# 阿里云VOD Bundle 路由配置
+
+# 视频上传相关路由
+aliyun_vod_upload:
+    resource: '../src/Controller/VideoUploadController.php'
+    type: attribute
+
+# 播放统计相关路由
+aliyun_vod_statistics:
+    resource: '../src/Controller/StatisticsController.php'
+    type: attribute 

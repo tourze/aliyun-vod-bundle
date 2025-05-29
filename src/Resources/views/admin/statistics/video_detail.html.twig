@@ -1,0 +1,274 @@
+{% extends '@EasyAdmin/layout.html.twig' %}
+
+{% block title %}{{ video.title }} - 播放统计{% endblock %}
+
+{% block content_title %}{{ video.title }} - 播放统计{% endblock %}
+
+{% block main %}
+<div class="container-fluid">
+    <!-- 视频基本信息 -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">视频信息</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            {% if video.coverUrl %}
+                                <img src="{{ video.coverUrl }}" class="img-fluid rounded" alt="视频封面">
+                            {% else %}
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fa fa-video fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <h4>{{ video.title }}</h4>
+                            <p class="text-muted">{{ video.description ?: '暂无描述' }}</p>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>视频ID:</strong><br>
+                                    <code>{{ video.videoId }}</code>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>时长:</strong><br>
+                                    {{ video.duration ? (video.duration // 60) ~ '分' ~ (video.duration % 60) ~ '秒' : '未知' }}
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>状态:</strong><br>
+                                    <span class="badge bg-{{ video.status == 'Normal' ? 'success' : 'warning' }}">{{ video.status }}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>创建时间:</strong><br>
+                                    {{ video.createdTime|date('Y-m-d H:i:s') }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 播放统计卡片 -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3>{{ playStats.totalPlays }}</h3>
+                    <p class="mb-0">总播放次数</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3>{{ playStats.averagePlayDuration }}s</h3>
+                    <p class="mb-0">平均播放时长</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3>{{ completionRate.completionRate }}%</h3>
+                    <p class="mb-0">完播率</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <h3>{{ completionRate.completedPlays }}</h3>
+                    <p class="mb-0">完整播放次数</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 设备类型分布 -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">设备类型分布</h5>
+                </div>
+                <div class="card-body">
+                    {% if playStats.deviceStats %}
+                        <canvas id="deviceChart" width="400" height="300"></canvas>
+                    {% else %}
+                        <p class="text-muted text-center">暂无数据</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- 播放质量分布 -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">播放质量分布</h5>
+                </div>
+                <div class="card-body">
+                    {% if playStats.qualityStats %}
+                        <canvas id="qualityChart" width="400" height="300"></canvas>
+                    {% else %}
+                        <p class="text-muted text-center">暂无数据</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 详细统计表格 -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">详细统计数据</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>设备类型统计</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>设备类型</th>
+                                            <th>播放次数</th>
+                                            <th>占比</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for device, count in playStats.deviceStats %}
+                                            <tr>
+                                                <td>{{ device }}</td>
+                                                <td>{{ count }}</td>
+                                                <td>{{ ((count / playStats.totalPlays) * 100)|round(1) }}%</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>播放质量统计</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>播放质量</th>
+                                            <th>播放次数</th>
+                                            <th>占比</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for quality, count in playStats.qualityStats %}
+                                            <tr>
+                                                <td>{{ quality }}</td>
+                                                <td>{{ count }}</td>
+                                                <td>{{ ((count / playStats.totalPlays) * 100)|round(1) }}%</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <a href="{{ path('admin', {crudAction: 'index', crudControllerFqcn: 'Tourze\\AliyunVodBundle\\Controller\\Admin\\VideoCrud'}) }}" 
+                       class="btn btn-secondary">
+                        <i class="fa fa-arrow-left"></i> 返回视频列表
+                    </a>
+                    <a href="{{ path('admin', {crudAction: 'index', crudControllerFqcn: 'Tourze\\AliyunVodBundle\\Controller\\Admin\\PlayRecordCrud', filters: {video: video.id}}) }}" 
+                       class="btn btn-primary">
+                        <i class="fa fa-list"></i> 查看播放记录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 设备类型饼图
+    {% if playStats.deviceStats %}
+        const deviceCtx = document.getElementById('deviceChart').getContext('2d');
+        const deviceData = {{ playStats.deviceStats|json_encode|raw }};
+        
+        new Chart(deviceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(deviceData),
+                datasets: [{
+                    data: Object.values(deviceData),
+                    backgroundColor: [
+                        '#FF6384',
+                        '#36A2EB',
+                        '#FFCE56',
+                        '#4BC0C0',
+                        '#9966FF',
+                        '#FF9F40'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    {% endif %}
+
+    // 播放质量柱状图
+    {% if playStats.qualityStats %}
+        const qualityCtx = document.getElementById('qualityChart').getContext('2d');
+        const qualityData = {{ playStats.qualityStats|json_encode|raw }};
+        
+        new Chart(qualityCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(qualityData),
+                datasets: [{
+                    label: '播放次数',
+                    data: Object.values(qualityData),
+                    backgroundColor: '#36A2EB',
+                    borderColor: '#36A2EB',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    {% endif %}
+});
+</script>
+{% endblock %}

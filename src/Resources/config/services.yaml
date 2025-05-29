@@ -6,8 +6,6 @@ services:
 
   Tourze\AliyunVodBundle\Controller\:
     resource: '../../Controller/'
-  Tourze\AliyunVodBundle\EventListener\:
-    resource: '../../EventListener/'
   Tourze\AliyunVodBundle\Repository\:
     resource: '../../Repository/'
   Tourze\AliyunVodBundle\Service\:

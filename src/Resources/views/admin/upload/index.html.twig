@@ -1,0 +1,169 @@
+{% extends '@EasyAdmin/layout.html.twig' %}
+
+{% block title %}视频上传{% endblock %}
+
+{% block content_title %}视频上传{% endblock %}
+
+{% block main %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">上传视频文件</h5>
+                </div>
+                <div class="card-body">
+                    <form id="uploadForm">
+                        <div class="mb-3">
+                            <label for="config" class="form-label">选择配置</label>
+                            <select class="form-select" id="config" name="config">
+                                <option value="">使用默认配置</option>
+                                {% for config in configs %}
+                                    <option value="{{ config.name }}">{{ config.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="title" class="form-label">视频标题 *</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">视频描述</label>
+                            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tags" class="form-label">标签</label>
+                            <input type="text" class="form-control" id="tags" name="tags" placeholder="多个标签用逗号分隔">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="videoFile" class="form-label">选择视频文件 *</label>
+                            <input type="file" class="form-control" id="videoFile" accept="video/*" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-primary" id="uploadBtn">开始上传</button>
+                            <button type="button" class="btn btn-secondary" id="pauseBtn" style="display:none;">暂停</button>
+                            <button type="button" class="btn btn-success" id="resumeBtn" style="display:none;">继续</button>
+                        </div>
+
+                        <div class="progress mb-3" style="display:none;" id="progressContainer">
+                            <div class="progress-bar" role="progressbar" style="width: 0%" id="progressBar">0%</div>
+                        </div>
+
+                        <div class="alert alert-info" style="display:none;" id="statusMessage"></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">上传说明</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><i class="fa fa-check text-success"></i> 支持的格式：MP4、AVI、MOV、WMV等</li>
+                        <li><i class="fa fa-check text-success"></i> 最大文件大小：2GB</li>
+                        <li><i class="fa fa-check text-success"></i> 支持断点续传</li>
+                        <li><i class="fa fa-check text-success"></i> 自动转码处理</li>
+                        <li><i class="fa fa-info text-info"></i> 上传完成后会自动生成播放地址</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="card-title">最近上传</h5>
+                </div>
+                <div class="card-body">
+                    <div id="recentUploads">
+                        <p class="text-muted">暂无上传记录</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const uploadForm = document.getElementById('uploadForm');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resumeBtn = document.getElementById('resumeBtn');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const statusMessage = document.getElementById('statusMessage');
+    const videoFile = document.getElementById('videoFile');
+
+    let uploadAuth = null;
+    let uploader = null;
+
+    uploadBtn.addEventListener('click', function() {
+        const title = document.getElementById('title').value;
+        const fileName = videoFile.files[0]?.name;
+        
+        if (!title || !fileName) {
+            showMessage('请填写标题并选择文件', 'danger');
+            return;
+        }
+
+        // 获取上传凭证
+        getUploadAuth();
+    });
+
+    function getUploadAuth() {
+        const formData = new FormData(uploadForm);
+        formData.append('fileName', videoFile.files[0].name);
+
+        fetch('{{ path('admin_video_upload_auth') }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                uploadAuth = data.data;
+                startUpload();
+            } else {
+                showMessage(data.message, 'danger');
+            }
+        })
+        .catch(error => {
+            showMessage('获取上传凭证失败：' + error.message, 'danger');
+        });
+    }
+
+    function startUpload() {
+        // 这里需要集成阿里云VOD上传SDK
+        // 由于SDK较复杂，这里只是示例代码
+        showMessage('上传功能需要集成阿里云VOD上传SDK', 'info');
+        progressContainer.style.display = 'block';
+        
+        // 模拟上传进度
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 10;
+            progressBar.style.width = progress + '%';
+            progressBar.textContent = progress + '%';
+            
+            if (progress >= 100) {
+                clearInterval(interval);
+                showMessage('上传完成！', 'success');
+            }
+        }, 500);
+    }
+
+    function showMessage(message, type) {
+        statusMessage.className = `alert alert-${type}`;
+        statusMessage.textContent = message;
+        statusMessage.style.display = 'block';
+    }
+});
+</script>
+{% endblock %} 

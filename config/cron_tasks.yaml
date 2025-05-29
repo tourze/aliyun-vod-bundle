@@ -1,0 +1,36 @@
+# 阿里云VOD Bundle 定时任务配置
+
+# 从阿里云同步视频数据 - 每6小时执行一次
+sync_video_from_remote:
+  command: 'aliyun-vod:sync:from-remote'
+  schedule: '0 */6 * * *'
+  description: '从阿里云VOD同步视频数据到本地数据库'
+  enabled: true
+  options:
+    - '--limit=100'
+
+# 同步转码任务状态 - 每30分钟执行一次
+sync_transcode_task:
+  command: 'aliyun-vod:sync:transcode-task'
+  schedule: '*/30 * * * *'
+  description: '同步转码任务状态和进度'
+  enabled: true
+  options:
+    - '--status=Processing'
+    - '--limit=50'
+
+# 清理过期播放记录 - 每天凌晨2点执行
+cleanup_play_records:
+  command: 'aliyun-vod:cleanup:play-records'
+  schedule: '0 2 * * *'
+  description: '清理过期的播放记录'
+  enabled: true
+  options:
+    - '--days=90'
+
+# 生成统计报表 - 每天凌晨3点执行
+generate_statistics:
+  command: 'aliyun-vod:statistics:generate'
+  schedule: '0 3 * * *'
+  description: '生成每日统计报表'
+  enabled: true 
