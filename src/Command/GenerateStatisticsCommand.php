@@ -70,7 +70,7 @@ class GenerateStatisticsCommand extends Command
 
             return Command::SUCCESS;
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $io->error("生成统计报表时发生错误: {$e->getMessage()}");
             $this->logger->error('统计报表生成失败', [
                 'error' => $e->getMessage(),
