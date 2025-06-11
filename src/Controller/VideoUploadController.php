@@ -73,7 +73,7 @@ class VideoUploadController extends AbstractController
                 'data' => $result,
             ]);
 
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -110,7 +110,7 @@ class VideoUploadController extends AbstractController
                 'data' => $result,
             ]);
 
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -132,7 +132,7 @@ class VideoUploadController extends AbstractController
                 'data' => $result,
             ]);
 
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,
                 'message' => $e->getMessage(),

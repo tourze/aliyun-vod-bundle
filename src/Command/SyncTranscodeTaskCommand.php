@@ -83,7 +83,7 @@ class SyncTranscodeTaskCommand extends Command
                     }
 
                     $progressBar->advance();
-                } catch  (\Throwable $e) {
+                } catch (\Throwable $e) {
                     $totalErrors++;
                     $this->logger->error('转码任务同步失败', [
                         'taskId' => $task->getTaskId(),
@@ -113,7 +113,7 @@ class SyncTranscodeTaskCommand extends Command
 
             return $totalErrors > 0 ? Command::FAILURE : Command::SUCCESS;
 
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             $io->error("同步过程中发生错误: {$e->getMessage()}");
             $this->logger->error('转码任务同步异常', [
                 'error' => $e->getMessage(),
@@ -209,7 +209,7 @@ class SyncTranscodeTaskCommand extends Command
 
             return $task->isCompleted() ? 'completed' : 'synced';
 
-        } catch  (\Throwable $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('转码任务同步失败', [
                 'taskId' => $task->getTaskId(),
                 'error' => $e->getMessage(),

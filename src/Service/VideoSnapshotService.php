@@ -136,7 +136,7 @@ class VideoSnapshotService
         foreach ($videoIds as $videoId) {
             try {
                 $results[$videoId] = $this->submitSnapshotJob($videoId, null, $count, null, $config);
-            } catch  (\Throwable $e) {
+            } catch (\Throwable $e) {
                 $results[$videoId] = [
                     'error' => $e->getMessage(),
                     'videoId' => $videoId,
