@@ -37,7 +37,7 @@ class VodClientFactory
             // 尝试调用一个简单的API来验证配置
             $client->getPlayInfo('test');
             return true;
-        } catch (\Throwable $e) {
+        } catch  (\Throwable $e) {
             // 如果是因为视频ID不存在的错误，说明配置是有效的
             if (str_contains($e->getMessage(), 'InvalidVideo.NotFound')) {
                 return true;

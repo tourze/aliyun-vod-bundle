@@ -85,7 +85,7 @@ class CleanupPlayRecordsCommand extends Command
 
             return Command::SUCCESS;
 
-        } catch (\Throwable $e) {
+        } catch  (\Throwable $e) {
             $io->error("清理过程中发生错误: {$e->getMessage()}");
             $this->logger->error('播放记录清理失败', [
                 'error' => $e->getMessage(),

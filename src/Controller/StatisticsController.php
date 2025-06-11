@@ -75,7 +75,7 @@ class StatisticsController extends AbstractController
                 'data' => $stats,
             ]);
 
-        } catch (\Throwable $e) {
+        } catch  (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -106,7 +106,7 @@ class StatisticsController extends AbstractController
                 'data' => $behavior,
             ]);
 
-        } catch (\Throwable $e) {
+        } catch  (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -129,7 +129,7 @@ class StatisticsController extends AbstractController
                 'data' => $popularVideos,
             ]);
 
-        } catch (\Throwable $e) {
+        } catch  (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -153,7 +153,7 @@ class StatisticsController extends AbstractController
                 'deletedCount' => $deletedCount,
             ]);
 
-        } catch (\Throwable $e) {
+        } catch  (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,
                 'message' => $e->getMessage(),

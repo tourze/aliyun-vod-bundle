@@ -63,7 +63,7 @@ class PlayAuthService
         foreach ($videoIds as $videoId) {
             try {
                 $results[$videoId] = $this->getPlayAuth($videoId, $authInfoTimeout, $config);
-            } catch (\Throwable $e) {
+            } catch  (\Throwable $e) {
                 $results[$videoId] = [
                     'error' => $e->getMessage(),
                     'videoId' => $videoId,
