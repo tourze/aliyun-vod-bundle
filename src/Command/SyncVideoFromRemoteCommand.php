@@ -77,7 +77,7 @@ class SyncVideoFromRemoteCommand extends Command
                     $totalSynced += $result['synced'];
                     $totalUpdated += $result['updated'];
                     $totalErrors += $result['errors'];
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     $io->error("配置 {$config->getName()} 同步失败: {$e->getMessage()}");
                     $this->logger->error('视频同步失败', [
                         'config' => $config->getName(),
@@ -104,7 +104,7 @@ class SyncVideoFromRemoteCommand extends Command
 
             return $totalErrors > 0 ? Command::FAILURE : Command::SUCCESS;
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $io->error("同步过程中发生错误: {$e->getMessage()}");
             $this->logger->error('视频同步异常', [
                 'error' => $e->getMessage(),
@@ -159,7 +159,7 @@ class SyncVideoFromRemoteCommand extends Command
                 }
 
                 $progressBar->advance();
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $errors++;
                 $this->logger->error('单个视频同步失败', [
                     'videoId' => $remoteVideoData['videoId'] ?? 'unknown',

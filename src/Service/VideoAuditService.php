@@ -129,7 +129,7 @@ class VideoAuditService
         foreach ($mediaIds as $mediaId) {
             try {
                 $results[$mediaId] = $this->submitAIMediaAuditJob($mediaId, $templateId, $config);
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $results[$mediaId] = [
                     'error' => $e->getMessage(),
                     'mediaId' => $mediaId,

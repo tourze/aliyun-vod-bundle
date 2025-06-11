@@ -80,7 +80,7 @@ class SyncVideoToRemoteCommand extends Command
                     }
 
                     $progressBar->advance();
-                } catch (\Exception $e) {
+                } catch (\Throwable $e) {
                     $totalErrors++;
                     $this->logger->error('视频同步到远程失败', [
                         'videoId' => $video->getVideoId(),
@@ -108,7 +108,7 @@ class SyncVideoToRemoteCommand extends Command
 
             return $totalErrors > 0 ? Command::FAILURE : Command::SUCCESS;
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $io->error("同步过程中发生错误: {$e->getMessage()}");
             $this->logger->error('视频同步到远程异常', [
                 'error' => $e->getMessage(),
@@ -169,7 +169,7 @@ class SyncVideoToRemoteCommand extends Command
 
             return false;
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->logger->error('视频同步到远程失败', [
                 'videoId' => $video->getVideoId(),
                 'error' => $e->getMessage(),
