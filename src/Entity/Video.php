@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Tourze\AliyunVodBundle\Repository\VideoRepository;
 use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
+use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 
 /**
  * 视频实体
@@ -15,6 +16,7 @@ use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
 #[ORM\Table(name: 'aliyun_vod_video', options: ['comment' => '阿里云VOD视频表'])]
 class Video implements \Stringable
 {
+    use TimestampableAware;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]

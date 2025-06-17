@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Tourze\AliyunVodBundle\Repository\TranscodeTaskRepository;
 use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
+use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 
 /**
  * 转码任务实体
@@ -15,6 +16,7 @@ use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
 #[ORM\Table(name: 'aliyun_vod_transcode_task', options: ['comment' => '阿里云VOD转码任务表'])]
 class TranscodeTask implements \Stringable
 {
+    use TimestampableAware;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER)]
