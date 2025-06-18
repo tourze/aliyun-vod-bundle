@@ -27,8 +27,8 @@ class VideoTest extends TestCase
         
         $this->assertEquals('Uploading', $video->getStatus());
         $this->assertTrue($video->isValid());
-        $this->assertInstanceOf(\DateTime::class, $video->getCreatedTime());
-        $this->assertInstanceOf(\DateTime::class, $video->getUpdatedTime());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $video->getCreatedTime());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $video->getUpdatedTime());
     }
 
     public function test_setConfig_withValidConfig(): void

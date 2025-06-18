@@ -30,7 +30,7 @@ class VideoWatermarkService
         ?AliyunVodConfig $config = null
     ): array {
         $config = $config ?: $this->configService->getDefaultConfig();
-        if (!$config) {
+        if ($config === null) {
             throw new \RuntimeException('未找到可用的阿里云VOD配置');
         }
 
@@ -66,17 +66,17 @@ class VideoWatermarkService
         ?AliyunVodConfig $config = null
     ): array {
         $config = $config ?: $this->configService->getDefaultConfig();
-        if (!$config) {
+        if ($config === null) {
             throw new \RuntimeException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
 
         $requestData = ['watermarkId' => $watermarkId];
-        if ($name) {
+        if ($name !== null) {
             $requestData['name'] = $name;
         }
-        if ($watermarkConfig) {
+        if ($watermarkConfig !== null) {
             $requestData['watermarkConfig'] = $watermarkConfig;
         }
 
@@ -103,7 +103,7 @@ class VideoWatermarkService
         ?AliyunVodConfig $config = null
     ): bool {
         $config = $config ?: $this->configService->getDefaultConfig();
-        if (!$config) {
+        if ($config === null) {
             throw new \RuntimeException('未找到可用的阿里云VOD配置');
         }
 
@@ -124,7 +124,7 @@ class VideoWatermarkService
     public function listWatermarks(?AliyunVodConfig $config = null): array
     {
         $config = $config ?: $this->configService->getDefaultConfig();
-        if (!$config) {
+        if ($config === null) {
             throw new \RuntimeException('未找到可用的阿里云VOD配置');
         }
 
@@ -160,7 +160,7 @@ class VideoWatermarkService
         ?AliyunVodConfig $config = null
     ): array {
         $config = $config ?: $this->configService->getDefaultConfig();
-        if (!$config) {
+        if ($config === null) {
             throw new \RuntimeException('未找到可用的阿里云VOD配置');
         }
 

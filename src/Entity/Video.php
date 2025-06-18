@@ -19,7 +19,7 @@ class Video implements \Stringable
     use TimestampableAware;
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\Column(type: Types::INTEGER, options: ['comment' => '主键ID'])]
     private int $id = 0;
 
     #[ORM\ManyToOne(targetEntity: AliyunVodConfig::class)]
@@ -57,17 +57,17 @@ class Video implements \Stringable
     private bool $valid = true;
 
     #[CreateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['comment' => '创建时间'])]
-    private \DateTime $createdTime;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, options: ['comment' => '创建时间'])]
+    private \DateTimeImmutable $createdTime;
 
     #[UpdateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['comment' => '更新时间'])]
-    private \DateTime $updatedTime;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, options: ['comment' => '更新时间'])]
+    private \DateTimeImmutable $updatedTime;
 
     public function __construct()
     {
-        $this->createdTime = new \DateTime();
-        $this->updatedTime = new \DateTime();
+        $this->createdTime = new \DateTimeImmutable();
+        $this->updatedTime = new \DateTimeImmutable();
     }
 
     public function __toString(): string
@@ -88,7 +88,7 @@ class Video implements \Stringable
     public function setConfig(AliyunVodConfig $config): self
     {
         $this->config = $config;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -100,7 +100,7 @@ class Video implements \Stringable
     public function setVideoId(string $videoId): self
     {
         $this->videoId = $videoId;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -112,7 +112,7 @@ class Video implements \Stringable
     public function setTitle(string $title): self
     {
         $this->title = $title;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -124,7 +124,7 @@ class Video implements \Stringable
     public function setDescription(?string $description): self
     {
         $this->description = $description;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -136,7 +136,7 @@ class Video implements \Stringable
     public function setDuration(?int $duration): self
     {
         $this->duration = $duration;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -148,7 +148,7 @@ class Video implements \Stringable
     public function setSize(?int $size): self
     {
         $this->size = $size;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -160,7 +160,7 @@ class Video implements \Stringable
     public function setStatus(string $status): self
     {
         $this->status = $status;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -172,7 +172,7 @@ class Video implements \Stringable
     public function setCoverUrl(?string $coverUrl): self
     {
         $this->coverUrl = $coverUrl;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -184,7 +184,7 @@ class Video implements \Stringable
     public function setPlayUrl(?string $playUrl): self
     {
         $this->playUrl = $playUrl;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -196,7 +196,7 @@ class Video implements \Stringable
     public function setTags(?string $tags): self
     {
         $this->tags = $tags;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -208,16 +208,16 @@ class Video implements \Stringable
     public function setValid(bool $valid): self
     {
         $this->valid = $valid;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
-    public function getCreatedTime(): \DateTime
+    public function getCreatedTime(): \DateTimeImmutable
     {
         return $this->createdTime;
     }
 
-    public function getUpdatedTime(): \DateTime
+    public function getUpdatedTime(): \DateTimeImmutable
     {
         return $this->updatedTime;
     }

@@ -19,7 +19,7 @@ class AliyunVodConfig implements \Stringable
     use TimestampableAware;
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\Column(type: Types::INTEGER, options: ['comment' => '主键ID'])]
     private int $id = 0;
 
     #[ORM\Column(type: Types::STRING, length: 100, options: ['comment' => '配置名称'])]
@@ -50,17 +50,17 @@ class AliyunVodConfig implements \Stringable
     private bool $valid = true;
 
     #[CreateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['comment' => '创建时间'])]
-    private \DateTime $createdTime;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, options: ['comment' => '创建时间'])]
+    private \DateTimeImmutable $createdTime;
 
     #[UpdateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['comment' => '更新时间'])]
-    private \DateTime $updatedTime;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, options: ['comment' => '更新时间'])]
+    private \DateTimeImmutable $updatedTime;
 
     public function __construct()
     {
-        $this->createdTime = new \DateTime();
-        $this->updatedTime = new \DateTime();
+        $this->createdTime = new \DateTimeImmutable();
+        $this->updatedTime = new \DateTimeImmutable();
     }
 
     public function __toString(): string
@@ -81,7 +81,7 @@ class AliyunVodConfig implements \Stringable
     public function setName(string $name): self
     {
         $this->name = $name;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -93,7 +93,7 @@ class AliyunVodConfig implements \Stringable
     public function setAccessKeyId(string $accessKeyId): self
     {
         $this->accessKeyId = $accessKeyId;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -105,7 +105,7 @@ class AliyunVodConfig implements \Stringable
     public function setAccessKeySecret(string $accessKeySecret): self
     {
         $this->accessKeySecret = $accessKeySecret;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -117,7 +117,7 @@ class AliyunVodConfig implements \Stringable
     public function setRegionId(string $regionId): self
     {
         $this->regionId = $regionId;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -129,7 +129,7 @@ class AliyunVodConfig implements \Stringable
     public function setTemplateGroupId(?string $templateGroupId): self
     {
         $this->templateGroupId = $templateGroupId;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -141,7 +141,7 @@ class AliyunVodConfig implements \Stringable
     public function setStorageLocation(?string $storageLocation): self
     {
         $this->storageLocation = $storageLocation;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -153,7 +153,7 @@ class AliyunVodConfig implements \Stringable
     public function setCallbackUrl(?string $callbackUrl): self
     {
         $this->callbackUrl = $callbackUrl;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -165,7 +165,7 @@ class AliyunVodConfig implements \Stringable
     public function setIsDefault(bool $isDefault): self
     {
         $this->isDefault = $isDefault;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -177,16 +177,16 @@ class AliyunVodConfig implements \Stringable
     public function setValid(bool $valid): self
     {
         $this->valid = $valid;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
-    public function getCreatedTime(): \DateTime
+    public function getCreatedTime(): \DateTimeImmutable
     {
         return $this->createdTime;
     }
 
-    public function getUpdatedTime(): \DateTime
+    public function getUpdatedTime(): \DateTimeImmutable
     {
         return $this->updatedTime;
     }

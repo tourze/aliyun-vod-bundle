@@ -31,7 +31,7 @@ class PlayRecordTest extends TestCase
     {
         $record = new PlayRecord();
         
-        $this->assertInstanceOf(\DateTime::class, $record->getPlayTime());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $record->getPlayTime());
     }
 
     public function test_setVideo_withValidVideo(): void
@@ -233,7 +233,7 @@ class PlayRecordTest extends TestCase
 
     public function test_setPlayTime_withValidTime(): void
     {
-        $playTime = new \DateTime('2024-01-15 10:30:00');
+        $playTime = new \DateTimeImmutable('2024-01-15 10:30:00');
         $result = $this->record->setPlayTime($playTime);
         
         $this->assertSame($this->record, $result);
@@ -250,7 +250,7 @@ class PlayRecordTest extends TestCase
 
     public function test_allPropertiesChaining(): void
     {
-        $playTime = new \DateTime();
+        $playTime = new \DateTimeImmutable();
         
         $result = $this->record
             ->setVideo($this->video)
@@ -331,7 +331,7 @@ class PlayRecordTest extends TestCase
 
     public function test_playTime_withDifferentTimezones(): void
     {
-        $utcTime = new \DateTime('2024-01-15 10:30:00', new \DateTimeZone('UTC'));
+        $utcTime = new \DateTimeImmutable('2024-01-15 10:30:00', new \DateTimeZone('UTC'));
         $this->record->setPlayTime($utcTime);
         
         $this->assertEquals($utcTime, $this->record->getPlayTime());

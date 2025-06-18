@@ -27,7 +27,7 @@ class VideoManageService
         ?AliyunVodConfig $config = null
     ): array {
         $config = $config ?: $this->configService->getDefaultConfig();
-        if (!$config) {
+        if ($config === null) {
             throw new \RuntimeException('未找到可用的阿里云VOD配置');
         }
 
@@ -63,7 +63,7 @@ class VideoManageService
         ?AliyunVodConfig $config = null
     ): array {
         $config = $config ?: $this->configService->getDefaultConfig();
-        if (!$config) {
+        if ($config === null) {
             throw new \RuntimeException('未找到可用的阿里云VOD配置');
         }
 
@@ -113,7 +113,7 @@ class VideoManageService
         ?AliyunVodConfig $config = null
     ): bool {
         $config = $config ?: $this->configService->getDefaultConfig();
-        if (!$config) {
+        if ($config === null) {
             throw new \RuntimeException('未找到可用的阿里云VOD配置');
         }
 
@@ -139,7 +139,7 @@ class VideoManageService
         ?AliyunVodConfig $config = null
     ): bool {
         $config = $config ?: $this->configService->getDefaultConfig();
-        if (!$config) {
+        if ($config === null) {
             throw new \RuntimeException('未找到可用的阿里云VOD配置');
         }
 

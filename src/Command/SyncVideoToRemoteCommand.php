@@ -2,7 +2,6 @@
 
 namespace Tourze\AliyunVodBundle\Command;
 
-use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -26,7 +25,6 @@ class SyncVideoToRemoteCommand extends Command
     public const NAME = 'aliyun-vod:sync:to-remote';
 
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
         private readonly VideoRepository $videoRepository,
         private readonly VideoManageService $videoManageService,
         private readonly LoggerInterface $logger
@@ -50,7 +48,7 @@ class SyncVideoToRemoteCommand extends Command
         $videoId = $input->getOption('video-id');
         $status = $input->getOption('status');
         $limit = (int) $input->getOption('limit');
-        $dryRun = $input->getOption('dry-run');
+        $dryRun = (bool) $input->getOption('dry-run');
 
         $io->title('本地视频数据同步到阿里云VOD');
 
@@ -123,13 +121,13 @@ class SyncVideoToRemoteCommand extends Command
      */
     private function getVideosToSync(?string $videoId, ?string $status, int $limit): array
     {
-        if ($videoId) {
+        if ($videoId !== null) {
             $video = $this->videoRepository->findByVideoId($videoId);
-            return $video ? [$video] : [];
+            return $video !== null ? [$video] : [];
         }
 
         $criteria = ['valid' => true];
-        if ($status) {
+        if ($status !== null) {
             $criteria['status'] = $status;
         }
 

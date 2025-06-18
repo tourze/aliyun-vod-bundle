@@ -50,7 +50,7 @@ class SyncTranscodeTaskCommand extends Command
         $taskId = $input->getOption('task-id');
         $status = $input->getOption('status');
         $limit = (int) $input->getOption('limit');
-        $dryRun = $input->getOption('dry-run');
+        $dryRun = (bool) $input->getOption('dry-run');
 
         $io->title('转码任务状态同步');
 
@@ -128,12 +128,12 @@ class SyncTranscodeTaskCommand extends Command
      */
     private function getTasksToSync(?string $taskId, ?string $status, int $limit): array
     {
-        if ($taskId) {
+        if ($taskId !== null) {
             $task = $this->transcodeTaskRepository->findByTaskId($taskId);
-            return $task ? [$task] : [];
+            return $task !== null ? [$task] : [];
         }
 
-        if ($status) {
+        if ($status !== null) {
             return $this->transcodeTaskRepository->findBy(
                 ['status' => $status],
                 ['createdTime' => 'ASC'],

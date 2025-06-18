@@ -138,7 +138,6 @@ class VideoRepositoryTest extends TestCase
         // 测试返回空数组
         $repository->setMockResult([]);
         $result = $repository->findValidVideos();
-        $this->assertIsArray($result);
         $this->assertEmpty($result);
 
         // 测试返回视频数组
@@ -148,7 +147,6 @@ class VideoRepositoryTest extends TestCase
         
         $repository->setMockResult($videos);
         $result = $repository->findValidVideos();
-        $this->assertIsArray($result);
         $this->assertCount(2, $result);
         $this->assertSame($videos, $result);
     }

@@ -14,7 +14,6 @@ use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
 use Tourze\AliyunVodBundle\Entity\Video;
 use Tourze\AliyunVodBundle\Repository\AliyunVodConfigRepository;
 use Tourze\AliyunVodBundle\Repository\VideoRepository;
-use Tourze\AliyunVodBundle\Service\VideoManageService;
 
 /**
  * 从阿里云VOD同步视频数据到本地数据库
@@ -31,7 +30,6 @@ class SyncVideoFromRemoteCommand extends Command
         private readonly EntityManagerInterface $entityManager,
         private readonly AliyunVodConfigRepository $configRepository,
         private readonly VideoRepository $videoRepository,
-        private readonly VideoManageService $videoManageService,
         private readonly LoggerInterface $logger
     ) {
         parent::__construct();
@@ -52,8 +50,8 @@ class SyncVideoFromRemoteCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $configName = $input->getOption('config');
         $limit = (int) $input->getOption('limit');
-        $force = $input->getOption('force');
-        $dryRun = $input->getOption('dry-run');
+        $force = (bool) $input->getOption('force');
+        $dryRun = (bool) $input->getOption('dry-run');
 
         $io->title('阿里云VOD视频数据同步');
 
@@ -119,9 +117,9 @@ class SyncVideoFromRemoteCommand extends Command
      */
     private function getConfigs(?string $configName): array
     {
-        if ($configName) {
+        if ($configName !== null) {
             $config = $this->configRepository->findOneBy(['name' => $configName, 'valid' => true]);
-            return $config ? [$config] : [];
+            return $config !== null ? [$config] : [];
         }
 
         return $this->configRepository->findActiveConfigs();
@@ -192,15 +190,15 @@ class SyncVideoFromRemoteCommand extends Command
         $videoId = $remoteVideoData['videoId'];
         $existingVideo = $this->videoRepository->findByVideoId($videoId);
 
-        if ($existingVideo && !$force) {
+        if ($existingVideo !== null && !$force) {
             return 'skipped';
         }
 
         if ($dryRun) {
-            return $existingVideo ? 'would_update' : 'would_sync';
+            return $existingVideo !== null ? 'would_update' : 'would_sync';
         }
 
-        if ($existingVideo) {
+        if ($existingVideo !== null) {
             // 更新现有视频
             $this->updateVideoFromRemoteData($existingVideo, $remoteVideoData);
             return 'updated';

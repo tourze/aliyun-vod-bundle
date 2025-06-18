@@ -16,7 +16,7 @@ class PlayRecord implements \Stringable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\Column(type: Types::INTEGER, options: ['comment' => '主键ID'])]
     private int $id = 0;
 
     #[ORM\ManyToOne(targetEntity: Video::class)]
@@ -48,12 +48,12 @@ class PlayRecord implements \Stringable
     private ?string $playerVersion = null;
 
     #[CreateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['comment' => '播放时间'])]
-    private \DateTime $playTime;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, options: ['comment' => '播放时间'])]
+    private \DateTimeImmutable $playTime;
 
     public function __construct()
     {
-        $this->playTime = new \DateTime();
+        $this->playTime = new \DateTimeImmutable();
     }
 
     public function __toString(): string
@@ -166,12 +166,12 @@ class PlayRecord implements \Stringable
         return $this;
     }
 
-    public function getPlayTime(): \DateTime
+    public function getPlayTime(): \DateTimeImmutable
     {
         return $this->playTime;
     }
 
-    public function setPlayTime(\DateTime $playTime): self
+    public function setPlayTime(\DateTimeImmutable $playTime): self
     {
         $this->playTime = $playTime;
         return $this;

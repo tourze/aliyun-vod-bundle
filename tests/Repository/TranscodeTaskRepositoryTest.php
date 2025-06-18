@@ -140,7 +140,6 @@ class TranscodeTaskRepositoryTest extends TestCase
         // 测试返回空数组
         $repository->setMockResult([]);
         $result = $repository->findProcessingTasks();
-        $this->assertIsArray($result);
         $this->assertEmpty($result);
 
         // 测试返回任务数组
@@ -150,7 +149,6 @@ class TranscodeTaskRepositoryTest extends TestCase
         
         $repository->setMockResult($tasks);
         $result = $repository->findProcessingTasks();
-        $this->assertIsArray($result);
         $this->assertCount(2, $result);
         $this->assertSame($tasks, $result);
     }

@@ -51,7 +51,7 @@ class GenerateStatisticsCommand extends Command
 
         try {
             // 解析日期
-            $targetDate = $date ? new \DateTime($date) : new \DateTime('yesterday');
+            $targetDate = $date !== null ? new \DateTime($date) : new \DateTime('yesterday');
             
             $io->info("生成 {$targetDate->format('Y-m-d')} 的{$this->getTypeLabel($type)}统计报表");
 
@@ -236,7 +236,7 @@ class GenerateStatisticsCommand extends Command
     {
         $json = json_encode($statistics, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
         
-        if ($file) {
+        if ($file !== null) {
             file_put_contents($file, $json);
             $io->success("统计报表已保存到: {$file}");
         } else {
@@ -252,7 +252,7 @@ class GenerateStatisticsCommand extends Command
         $csv = "统计类型,日期,总播放次数,独立视频数\n";
         $csv .= "{$statistics['type']},{$statistics['date']},{$statistics['totalPlays']},{$statistics['uniqueVideos']}\n";
         
-        if ($file) {
+        if ($file !== null) {
             file_put_contents($file, $csv);
             $io->success("统计报表已保存到: {$file}");
         } else {

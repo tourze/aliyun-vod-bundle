@@ -28,7 +28,7 @@ class VideoSnapshotService
         ?AliyunVodConfig $config = null
     ): array {
         $config = $config ?: $this->configService->getDefaultConfig();
-        if (!$config) {
+        if ($config === null) {
             throw new \RuntimeException('未找到可用的阿里云VOD配置');
         }
 
@@ -39,11 +39,11 @@ class VideoSnapshotService
             'count' => $count,
         ];
 
-        if ($snapshotTemplateId) {
+        if ($snapshotTemplateId !== null) {
             $requestData['snapshotTemplateId'] = $snapshotTemplateId;
         }
 
-        if ($interval) {
+        if ($interval !== null) {
             $requestData['interval'] = $interval;
         }
 
@@ -69,7 +69,7 @@ class VideoSnapshotService
         ?AliyunVodConfig $config = null
     ): array {
         $config = $config ?: $this->configService->getDefaultConfig();
-        if (!$config) {
+        if ($config === null) {
             throw new \RuntimeException('未找到可用的阿里云VOD配置');
         }
 

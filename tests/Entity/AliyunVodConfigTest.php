@@ -24,8 +24,8 @@ class AliyunVodConfigTest extends TestCase
         $this->assertEquals('cn-shanghai', $config->getRegionId());
         $this->assertFalse($config->isDefault());
         $this->assertTrue($config->isValid());
-        $this->assertInstanceOf(\DateTime::class, $config->getCreatedTime());
-        $this->assertInstanceOf(\DateTime::class, $config->getUpdatedTime());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $config->getCreatedTime());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $config->getUpdatedTime());
     }
 
     public function test_setName_withValidName(): void

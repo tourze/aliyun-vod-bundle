@@ -42,8 +42,8 @@ class CleanupPlayRecordsCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $daysToKeep = (int) $input->getOption('days');
-        $dryRun = $input->getOption('dry-run');
-        $force = $input->getOption('force');
+        $dryRun = (bool) $input->getOption('dry-run');
+        $force = (bool) $input->getOption('force');
 
         $io->title('清理过期播放记录');
 

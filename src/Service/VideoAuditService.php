@@ -27,14 +27,14 @@ class VideoAuditService
         ?AliyunVodConfig $config = null
     ): array {
         $config = $config ?: $this->configService->getDefaultConfig();
-        if (!$config) {
+        if ($config === null) {
             throw new \RuntimeException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
 
         $requestData = ['mediaId' => $mediaId];
-        if ($templateId) {
+        if ($templateId !== null) {
             $requestData['templateId'] = $templateId;
         }
 
@@ -56,7 +56,7 @@ class VideoAuditService
         ?AliyunVodConfig $config = null
     ): array {
         $config = $config ?: $this->configService->getDefaultConfig();
-        if (!$config) {
+        if ($config === null) {
             throw new \RuntimeException('未找到可用的阿里云VOD配置');
         }
 
@@ -92,7 +92,7 @@ class VideoAuditService
         ?AliyunVodConfig $config = null
     ): array {
         $config = $config ?: $this->configService->getDefaultConfig();
-        if (!$config) {
+        if ($config === null) {
             throw new \RuntimeException('未找到可用的阿里云VOD配置');
         }
 

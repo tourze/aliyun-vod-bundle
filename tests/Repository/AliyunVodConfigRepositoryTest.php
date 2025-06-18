@@ -141,7 +141,6 @@ class AliyunVodConfigRepositoryTest extends TestCase
         // 测试返回空数组的情况
         $repository->setMockResult([]);
         $result = $repository->findActiveConfigs();
-        $this->assertIsArray($result);
         $this->assertEmpty($result);
 
         // 测试返回配置数组的情况
@@ -153,7 +152,6 @@ class AliyunVodConfigRepositoryTest extends TestCase
         $configs = [$config1, $config2];
         $repository->setMockResult($configs);
         $result = $repository->findActiveConfigs();
-        $this->assertIsArray($result);
         $this->assertCount(2, $result);
         $this->assertSame($configs, $result);
     }

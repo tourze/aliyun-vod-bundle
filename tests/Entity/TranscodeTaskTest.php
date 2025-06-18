@@ -35,8 +35,8 @@ class TranscodeTaskTest extends TestCase
         $this->assertEquals(0, $task->getProgress());
         $this->assertNull($task->getCompletedTime());
         $this->assertFalse($task->isCompleted());
-        $this->assertInstanceOf(\DateTime::class, $task->getCreatedTime());
-        $this->assertInstanceOf(\DateTime::class, $task->getUpdatedTime());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $task->getCreatedTime());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $task->getUpdatedTime());
     }
 
     public function test_setVideo_withValidVideo(): void
@@ -157,7 +157,7 @@ class TranscodeTaskTest extends TestCase
 
     public function test_setCompletedTime_withValidTime(): void
     {
-        $completedTime = new \DateTime();
+        $completedTime = new \DateTimeImmutable();
         $result = $this->task->setCompletedTime($completedTime);
         
         $this->assertSame($this->task, $result);
@@ -166,7 +166,7 @@ class TranscodeTaskTest extends TestCase
 
     public function test_setCompletedTime_withNull(): void
     {
-        $this->task->setCompletedTime(new \DateTime());
+        $this->task->setCompletedTime(new \DateTimeImmutable());
         $result = $this->task->setCompletedTime(null);
         
         $this->assertSame($this->task, $result);
@@ -181,7 +181,7 @@ class TranscodeTaskTest extends TestCase
         $result = $this->task->markAsCompleted();
         
         $this->assertSame($this->task, $result);
-        $this->assertInstanceOf(\DateTime::class, $this->task->getCompletedTime());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $this->task->getCompletedTime());
         $this->assertTrue($this->task->isCompleted());
     }
 
@@ -199,7 +199,7 @@ class TranscodeTaskTest extends TestCase
 
     public function test_isCompleted_withCompletedTime(): void
     {
-        $this->task->setCompletedTime(new \DateTime());
+        $this->task->setCompletedTime(new \DateTimeImmutable());
         
         $this->assertTrue($this->task->isCompleted());
     }
@@ -243,7 +243,7 @@ class TranscodeTaskTest extends TestCase
 
     public function test_allPropertiesChaining(): void
     {
-        $completedTime = new \DateTime();
+        $completedTime = new \DateTimeImmutable();
         
         $result = $this->task
             ->setVideo($this->video)

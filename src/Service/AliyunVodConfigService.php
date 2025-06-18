@@ -119,7 +119,7 @@ class AliyunVodConfigService
             ->setParameter('false', false)
             ->setParameter('true', true);
 
-        if ($excludeId) {
+        if ($excludeId !== null) {
             $qb->andWhere('c.id != :excludeId')
                 ->setParameter('excludeId', $excludeId);
         }

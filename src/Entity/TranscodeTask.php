@@ -19,7 +19,7 @@ class TranscodeTask implements \Stringable
     use TimestampableAware;
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: Types::INTEGER)]
+    #[ORM\Column(type: Types::INTEGER, options: ['comment' => '主键ID'])]
     private int $id = 0;
 
     #[ORM\ManyToOne(targetEntity: Video::class)]
@@ -45,20 +45,20 @@ class TranscodeTask implements \Stringable
     private ?string $errorMessage = null;
 
     #[CreateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['comment' => '创建时间'])]
-    private \DateTime $createdTime;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, options: ['comment' => '创建时间'])]
+    private \DateTimeImmutable $createdTime;
 
     #[UpdateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, options: ['comment' => '更新时间'])]
-    private \DateTime $updatedTime;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, options: ['comment' => '更新时间'])]
+    private \DateTimeImmutable $updatedTime;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '完成时间'])]
-    private ?\DateTime $completedTime = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '完成时间'])]
+    private ?\DateTimeImmutable $completedTime = null;
 
     public function __construct()
     {
-        $this->createdTime = new \DateTime();
-        $this->updatedTime = new \DateTime();
+        $this->createdTime = new \DateTimeImmutable();
+        $this->updatedTime = new \DateTimeImmutable();
     }
 
     public function __toString(): string
@@ -79,7 +79,7 @@ class TranscodeTask implements \Stringable
     public function setVideo(Video $video): self
     {
         $this->video = $video;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -91,7 +91,7 @@ class TranscodeTask implements \Stringable
     public function setTaskId(string $taskId): self
     {
         $this->taskId = $taskId;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -103,7 +103,7 @@ class TranscodeTask implements \Stringable
     public function setTemplateId(?string $templateId): self
     {
         $this->templateId = $templateId;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -115,7 +115,7 @@ class TranscodeTask implements \Stringable
     public function setStatus(string $status): self
     {
         $this->status = $status;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -127,7 +127,7 @@ class TranscodeTask implements \Stringable
     public function setProgress(int $progress): self
     {
         $this->progress = $progress;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -139,7 +139,7 @@ class TranscodeTask implements \Stringable
     public function setErrorCode(?string $errorCode): self
     {
         $this->errorCode = $errorCode;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -151,29 +151,29 @@ class TranscodeTask implements \Stringable
     public function setErrorMessage(?string $errorMessage): self
     {
         $this->errorMessage = $errorMessage;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
-    public function getCreatedTime(): \DateTime
+    public function getCreatedTime(): \DateTimeImmutable
     {
         return $this->createdTime;
     }
 
-    public function getUpdatedTime(): \DateTime
+    public function getUpdatedTime(): \DateTimeImmutable
     {
         return $this->updatedTime;
     }
 
-    public function getCompletedTime(): ?\DateTime
+    public function getCompletedTime(): ?\DateTimeImmutable
     {
         return $this->completedTime;
     }
 
-    public function setCompletedTime(?\DateTime $completedTime): self
+    public function setCompletedTime(?\DateTimeImmutable $completedTime): self
     {
         $this->completedTime = $completedTime;
-        $this->updatedTime = new \DateTime();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -182,8 +182,8 @@ class TranscodeTask implements \Stringable
      */
     public function markAsCompleted(): self
     {
-        $this->completedTime = new \DateTime();
-        $this->updatedTime = new \DateTime();
+        $this->completedTime = new \DateTimeImmutable();
+        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 

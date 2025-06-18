@@ -197,17 +197,14 @@ class AliyunVodConfigServiceTest extends TestCase
         $validAccessKeys = ['LTAI4G8mF9XxXxXxXxXxXxXx', 'LTAI4Test123456789012345'];
         
         foreach ($validNames as $name) {
-            $this->assertIsString($name);
             $this->assertNotEmpty($name);
         }
         
         foreach ($validRegions as $region) {
-            $this->assertIsString($region);
             $this->assertNotEmpty($region);
         }
         
         foreach ($validAccessKeys as $accessKey) {
-            $this->assertIsString($accessKey);
             $this->assertNotEmpty($accessKey);
         }
     }

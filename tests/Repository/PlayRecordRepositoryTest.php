@@ -201,7 +201,6 @@ class PlayRecordRepositoryTest extends TestCase
         $validIpAddresses = ['192.168.1.1', '10.0.0.1', '172.16.0.1', '127.0.0.1'];
         
         foreach ($validIpAddresses as $ipAddress) {
-            $this->assertIsString($ipAddress);
             $this->assertNotEmpty($ipAddress);
             $this->assertMatchesRegularExpression('/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/', $ipAddress);
         }

@@ -6,7 +6,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Tourze\AliyunVodBundle\Entity\PlayRecord;
 use Tourze\AliyunVodBundle\Entity\Video;
 use Tourze\AliyunVodBundle\Repository\PlayRecordRepository;
-use Tourze\AliyunVodBundle\Repository\VideoRepository;
 
 /**
  * 播放统计服务
@@ -15,8 +14,7 @@ class StatisticsService
 {
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
-        private readonly PlayRecordRepository $playRecordRepository,
-        private readonly VideoRepository $videoRepository
+        private readonly PlayRecordRepository $playRecordRepository
     ) {
     }
 
@@ -198,7 +196,7 @@ class StatisticsService
         $playRecords = $this->playRecordRepository->findByVideo($video);
         $videoDuration = $video->getDuration();
 
-        if (!$videoDuration || empty($playRecords)) {
+        if ($videoDuration === null || empty($playRecords)) {
             return [
                 'videoId' => $video->getVideoId(),
                 'completionRate' => 0,
