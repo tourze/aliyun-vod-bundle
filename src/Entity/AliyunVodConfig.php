@@ -5,8 +5,6 @@ namespace Tourze\AliyunVodBundle\Entity;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Tourze\AliyunVodBundle\Repository\AliyunVodConfigRepository;
-use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
-use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 
 /**
@@ -17,6 +15,7 @@ use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 class AliyunVodConfig implements \Stringable
 {
     use TimestampableAware;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => '主键ID'])]
@@ -49,20 +48,6 @@ class AliyunVodConfig implements \Stringable
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true, 'comment' => '是否启用'])]
     private bool $valid = true;
 
-    #[CreateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, options: ['comment' => '创建时间'])]
-    private \DateTimeImmutable $createdTime;
-
-    #[UpdateTimeColumn]
-    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, options: ['comment' => '更新时间'])]
-    private \DateTimeImmutable $updatedTime;
-
-    public function __construct()
-    {
-        $this->createdTime = new \DateTimeImmutable();
-        $this->updatedTime = new \DateTimeImmutable();
-    }
-
     public function __toString(): string
     {
         return $this->name;
@@ -81,7 +66,6 @@ class AliyunVodConfig implements \Stringable
     public function setName(string $name): self
     {
         $this->name = $name;
-        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -93,7 +77,6 @@ class AliyunVodConfig implements \Stringable
     public function setAccessKeyId(string $accessKeyId): self
     {
         $this->accessKeyId = $accessKeyId;
-        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -105,7 +88,6 @@ class AliyunVodConfig implements \Stringable
     public function setAccessKeySecret(string $accessKeySecret): self
     {
         $this->accessKeySecret = $accessKeySecret;
-        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -117,7 +99,6 @@ class AliyunVodConfig implements \Stringable
     public function setRegionId(string $regionId): self
     {
         $this->regionId = $regionId;
-        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -129,7 +110,6 @@ class AliyunVodConfig implements \Stringable
     public function setTemplateGroupId(?string $templateGroupId): self
     {
         $this->templateGroupId = $templateGroupId;
-        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -141,7 +121,6 @@ class AliyunVodConfig implements \Stringable
     public function setStorageLocation(?string $storageLocation): self
     {
         $this->storageLocation = $storageLocation;
-        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -153,7 +132,6 @@ class AliyunVodConfig implements \Stringable
     public function setCallbackUrl(?string $callbackUrl): self
     {
         $this->callbackUrl = $callbackUrl;
-        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -165,7 +143,6 @@ class AliyunVodConfig implements \Stringable
     public function setIsDefault(bool $isDefault): self
     {
         $this->isDefault = $isDefault;
-        $this->updatedTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -177,17 +154,6 @@ class AliyunVodConfig implements \Stringable
     public function setValid(bool $valid): self
     {
         $this->valid = $valid;
-        $this->updatedTime = new \DateTimeImmutable();
         return $this;
-    }
-
-    public function getCreatedTime(): \DateTimeImmutable
-    {
-        return $this->createdTime;
-    }
-
-    public function getUpdatedTime(): \DateTimeImmutable
-    {
-        return $this->updatedTime;
     }
 }
