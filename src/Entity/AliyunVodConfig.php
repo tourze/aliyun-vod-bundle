@@ -48,6 +48,12 @@ class AliyunVodConfig implements \Stringable
     #[ORM\Column(type: Types::BOOLEAN, options: ['default' => true, 'comment' => '是否启用'])]
     private bool $valid = true;
 
+    public function __construct()
+    {
+        $this->createTime = new \DateTimeImmutable();
+        $this->updateTime = new \DateTimeImmutable();
+    }
+
     public function __toString(): string
     {
         return $this->name;
@@ -66,6 +72,7 @@ class AliyunVodConfig implements \Stringable
     public function setName(string $name): self
     {
         $this->name = $name;
+        $this->updateTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -77,6 +84,7 @@ class AliyunVodConfig implements \Stringable
     public function setAccessKeyId(string $accessKeyId): self
     {
         $this->accessKeyId = $accessKeyId;
+        $this->updateTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -88,6 +96,7 @@ class AliyunVodConfig implements \Stringable
     public function setAccessKeySecret(string $accessKeySecret): self
     {
         $this->accessKeySecret = $accessKeySecret;
+        $this->updateTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -99,6 +108,7 @@ class AliyunVodConfig implements \Stringable
     public function setRegionId(string $regionId): self
     {
         $this->regionId = $regionId;
+        $this->updateTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -110,6 +120,7 @@ class AliyunVodConfig implements \Stringable
     public function setTemplateGroupId(?string $templateGroupId): self
     {
         $this->templateGroupId = $templateGroupId;
+        $this->updateTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -121,6 +132,7 @@ class AliyunVodConfig implements \Stringable
     public function setStorageLocation(?string $storageLocation): self
     {
         $this->storageLocation = $storageLocation;
+        $this->updateTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -132,6 +144,7 @@ class AliyunVodConfig implements \Stringable
     public function setCallbackUrl(?string $callbackUrl): self
     {
         $this->callbackUrl = $callbackUrl;
+        $this->updateTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -143,6 +156,7 @@ class AliyunVodConfig implements \Stringable
     public function setIsDefault(bool $isDefault): self
     {
         $this->isDefault = $isDefault;
+        $this->updateTime = new \DateTimeImmutable();
         return $this;
     }
 
@@ -154,6 +168,7 @@ class AliyunVodConfig implements \Stringable
     public function setValid(bool $valid): self
     {
         $this->valid = $valid;
+        $this->updateTime = new \DateTimeImmutable();
         return $this;
     }
 }

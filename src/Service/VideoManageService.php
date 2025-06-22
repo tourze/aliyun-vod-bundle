@@ -76,7 +76,7 @@ class VideoManageService
         $response = $client->getPlayInfo($request);
 
         $playInfos = [];
-        foreach ($response->body->playInfoList as $playInfo) {
+        foreach ($response->body->playInfoList->playInfo as $playInfo) {
             $playInfos[] = [
                 'playURL' => $playInfo->playURL,
                 'definition' => $playInfo->definition,

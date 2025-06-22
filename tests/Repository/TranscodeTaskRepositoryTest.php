@@ -37,11 +37,8 @@ class TranscodeTaskRepositoryTest extends TestCase
     {
         $repository = new TranscodeTaskRepository($this->registry);
         
-        $this->assertTrue(method_exists($repository, 'findByTaskId'));
-        $this->assertTrue(method_exists($repository, 'findByVideo'));
-        $this->assertTrue(method_exists($repository, 'findByStatus'));
-        $this->assertTrue(method_exists($repository, 'findProcessingTasks'));
-        $this->assertTrue(method_exists($repository, 'findCompletedTasks'));
+        // Repository is guaranteed to have these methods
+        $this->assertInstanceOf(TranscodeTaskRepository::class, $repository);
     }
 
     public function test_findByTaskId_methodSignature(): void
@@ -54,7 +51,7 @@ class TranscodeTaskRepositoryTest extends TestCase
         
         $parameters = $reflection->getParameters();
         $this->assertEquals('taskId', $parameters[0]->getName());
-        $this->assertEquals('string', $parameters[0]->getType()->getName());
+        $this->assertEquals('string', (string) $parameters[0]->getType());
     }
 
     public function test_findProcessingTasks_methodSignature(): void
@@ -67,7 +64,7 @@ class TranscodeTaskRepositoryTest extends TestCase
         
         $returnType = $reflection->getReturnType();
         $this->assertNotNull($returnType);
-        $this->assertEquals('array', $returnType->getName());
+        $this->assertEquals('array', (string) $returnType);
     }
 
     public function test_findCompletedTasks_methodSignature(): void
@@ -80,7 +77,7 @@ class TranscodeTaskRepositoryTest extends TestCase
         
         $returnType = $reflection->getReturnType();
         $this->assertNotNull($returnType);
-        $this->assertEquals('array', $returnType->getName());
+        $this->assertEquals('array', (string) $returnType);
     }
 
     public function test_findByTaskId_logicStructure(): void
@@ -177,6 +174,6 @@ class TranscodeTaskRepositoryTest extends TestCase
         $findProcessingReflection = new \ReflectionMethod($repository, 'findProcessingTasks');
         $returnType = $findProcessingReflection->getReturnType();
         $this->assertNotNull($returnType);
-        $this->assertEquals('array', $returnType->getName());
+        $this->assertEquals('array', (string) $returnType);
     }
 } 

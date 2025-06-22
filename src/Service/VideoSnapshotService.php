@@ -53,7 +53,7 @@ class VideoSnapshotService
         return [
             'requestId' => $response->body->requestId,
             'snapshotJob' => [
-                'jobId' => $response->body->snapshotJob->jobId ?? null,
+                'jobId' => property_exists($response->body->snapshotJob, 'jobId') ? $response->body->snapshotJob->jobId : null,
             ],
         ];
     }
@@ -85,8 +85,8 @@ class VideoSnapshotService
         $response = $client->listSnapshots($request);
 
         $snapshots = [];
-        if (isset($response->body->mediaSnapshot->snapshots)) {
-            foreach ($response->body->mediaSnapshot->snapshots as $snapshot) {
+        if (property_exists($response->body->mediaSnapshot, 'snapshots')) {
+            foreach ($response->body->mediaSnapshot->snapshots->snapshot as $snapshot) {
                 $snapshots[] = [
                     'url' => $snapshot->url,
                     'index' => $snapshot->index,
@@ -97,8 +97,8 @@ class VideoSnapshotService
         return [
             'requestId' => $response->body->requestId,
             'mediaSnapshot' => [
-                'total' => $response->body->mediaSnapshot->total ?? 0,
-                'regular' => $response->body->mediaSnapshot->regular ?? '',
+                'total' => property_exists($response->body->mediaSnapshot, 'total') ? $response->body->mediaSnapshot->total : 0,
+                'regular' => property_exists($response->body->mediaSnapshot, 'regular') ? $response->body->mediaSnapshot->regular : '',
                 'snapshots' => $snapshots,
             ],
         ];

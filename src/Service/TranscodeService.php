@@ -75,7 +75,7 @@ class TranscodeService
             'taskStatus' => $task->taskStatus,
             'creationTime' => $task->creationTime,
             'completeTime' => $task->completeTime,
-            'transcodeJobInfoList' => $this->formatTranscodeJobInfoList($task->transcodeJobInfoList ?? []),
+            'transcodeJobInfoList' => $this->formatTranscodeJobInfoList($task->transcodeJobInfoList ?: []),
         ];
     }
 

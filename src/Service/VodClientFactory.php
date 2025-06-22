@@ -2,6 +2,7 @@
 
 namespace Tourze\AliyunVodBundle\Service;
 
+use AlibabaCloud\SDK\Vod\V20170321\Models\GetPlayInfoRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Vod;
 use Darabonba\OpenApi\Models\Config;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
@@ -35,7 +36,8 @@ class VodClientFactory
         try {
             $client = $this->createClient($config);
             // 尝试调用一个简单的API来验证配置
-            $client->getPlayInfo('test');
+            $request = new GetPlayInfoRequest(['videoId' => 'test_video_id']);
+            $client->getPlayInfo($request);
             return true;
         } catch (\Throwable $e) {
             // 如果是因为视频ID不存在的错误，说明配置是有效的

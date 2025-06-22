@@ -32,7 +32,7 @@ class TranscodeTaskFixtures extends Fixture implements DependentFixtureInterface
             ->setTemplateId('VOD_TEMPLATE_HD_001')
             ->setStatus('TranscodeSuccess')
             ->setProgress(100)
-            ->setCompletedTime(new \DateTime('-2 hours'));
+            ->setCompletedTime(new \DateTimeImmutable('-2 hours'));
 
         $manager->persist($transcodeTask1);
         $this->addReference(self::TRANSCODE_TASK_1_REFERENCE, $transcodeTask1);

@@ -36,11 +36,8 @@ class PlayRecordRepositoryTest extends TestCase
     {
         $repository = new PlayRecordRepository($this->registry);
         
-        $this->assertTrue(method_exists($repository, 'findByVideo'));
-        $this->assertTrue(method_exists($repository, 'findByDateRange'));
-        $this->assertTrue(method_exists($repository, 'findByIpAddress'));
-        $this->assertTrue(method_exists($repository, 'countByVideo'));
-        $this->assertTrue(method_exists($repository, 'getPopularVideos'));
+        // Repository is guaranteed to have these methods
+        $this->assertInstanceOf(PlayRecordRepository::class, $repository);
     }
 
     public function test_findByVideo_methodSignature(): void
@@ -78,7 +75,7 @@ class PlayRecordRepositoryTest extends TestCase
         
         $parameters = $reflection->getParameters();
         $this->assertEquals('ipAddress', $parameters[0]->getName());
-        $this->assertEquals('string', $parameters[0]->getType()->getName());
+        $this->assertEquals('string', (string) $parameters[0]->getType());
     }
 
     public function test_countByVideo_methodSignature(): void
@@ -103,7 +100,7 @@ class PlayRecordRepositoryTest extends TestCase
         
         $parameters = $reflection->getParameters();
         $this->assertEquals('limit', $parameters[0]->getName());
-        $this->assertEquals('int', $parameters[0]->getType()->getName());
+        $this->assertEquals('int', (string) $parameters[0]->getType());
     }
 
     public function test_findByIpAddress_logicStructure(): void
@@ -134,7 +131,7 @@ class PlayRecordRepositoryTest extends TestCase
         foreach ($ipAddresses as $ipAddress) {
             $repository->setMockResult([]);
             $result = $repository->findByIpAddress($ipAddress);
-            $this->assertIsArray($result);
+            $this->assertEquals([], $result);
         }
     }
 
@@ -157,31 +154,31 @@ class PlayRecordRepositoryTest extends TestCase
         $findByVideoReflection = new \ReflectionMethod($repository, 'findByVideo');
         $returnType = $findByVideoReflection->getReturnType();
         $this->assertNotNull($returnType);
-        $this->assertEquals('array', $returnType->getName());
+        $this->assertEquals('array', (string) $returnType);
         
         // 检查findByDateRange的返回类型
         $findByDateRangeReflection = new \ReflectionMethod($repository, 'findByDateRange');
         $returnType = $findByDateRangeReflection->getReturnType();
         $this->assertNotNull($returnType);
-        $this->assertEquals('array', $returnType->getName());
+        $this->assertEquals('array', (string) $returnType);
         
         // 检查findByIpAddress的返回类型
         $findByIpAddressReflection = new \ReflectionMethod($repository, 'findByIpAddress');
         $returnType = $findByIpAddressReflection->getReturnType();
         $this->assertNotNull($returnType);
-        $this->assertEquals('array', $returnType->getName());
+        $this->assertEquals('array', (string) $returnType);
         
         // 检查countByVideo的返回类型
         $countByVideoReflection = new \ReflectionMethod($repository, 'countByVideo');
         $returnType = $countByVideoReflection->getReturnType();
         $this->assertNotNull($returnType);
-        $this->assertEquals('int', $returnType->getName());
+        $this->assertEquals('int', (string) $returnType);
         
         // 检查getPopularVideos的返回类型
         $getPopularVideosReflection = new \ReflectionMethod($repository, 'getPopularVideos');
         $returnType = $getPopularVideosReflection->getReturnType();
         $this->assertNotNull($returnType);
-        $this->assertEquals('array', $returnType->getName());
+        $this->assertEquals('array', (string) $returnType);
     }
 
     public function test_repository_dateRangeValidation(): void
@@ -201,7 +198,7 @@ class PlayRecordRepositoryTest extends TestCase
         $validIpAddresses = ['192.168.1.1', '10.0.0.1', '172.16.0.1', '127.0.0.1'];
         
         foreach ($validIpAddresses as $ipAddress) {
-            $this->assertNotEmpty($ipAddress);
+            // These are hardcoded valid IP addresses
             $this->assertMatchesRegularExpression('/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/', $ipAddress);
         }
     }
@@ -211,9 +208,8 @@ class PlayRecordRepositoryTest extends TestCase
         // 测试热门视频查询的限制参数
         $validLimits = [5, 10, 20, 50, 100];
         
-        foreach ($validLimits as $limit) {
-            $this->assertIsInt($limit);
-            $this->assertGreaterThan(0, $limit);
-        }
+        // These are hardcoded valid limits
+        $this->assertCount(5, $validLimits);
+        $this->assertEquals([5, 10, 20, 50, 100], $validLimits);
     }
 } 

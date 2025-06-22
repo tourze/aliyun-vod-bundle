@@ -134,7 +134,7 @@ class VideoWatermarkService
         $response = $client->listWatermark($request);
 
         $watermarks = [];
-        if (isset($response->body->watermarkInfos)) {
+        if (property_exists($response->body, 'watermarkInfos')) {
             foreach ($response->body->watermarkInfos as $watermark) {
                 $watermarks[] = [
                     'watermarkId' => $watermark->watermarkId,
@@ -179,7 +179,7 @@ class VideoWatermarkService
                 'name' => $response->body->watermarkInfo->name,
                 'type' => $response->body->watermarkInfo->type,
                 'watermarkConfig' => $response->body->watermarkInfo->watermarkConfig,
-                'fileUrl' => $response->body->watermarkInfo->fileUrl ?? null,
+                'fileUrl' => property_exists($response->body->watermarkInfo, 'fileUrl') ? $response->body->watermarkInfo->fileUrl : null,
                 'isDefault' => $response->body->watermarkInfo->isDefault,
                 'creationTime' => $response->body->watermarkInfo->creationTime,
             ],

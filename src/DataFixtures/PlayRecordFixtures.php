@@ -43,7 +43,7 @@ class PlayRecordFixtures extends Fixture implements DependentFixtureInterface
                 ->setPlayQuality($playQualities[array_rand($playQualities)])
                 ->setDeviceType($deviceTypes[array_rand($deviceTypes)])
                 ->setPlayerVersion('2.1.0')
-                ->setPlayTime(new \DateTime('-' . rand(1, 30) . ' days'));
+                ->setPlayTime(new \DateTimeImmutable('-' . rand(1, 30) . ' days'));
 
             $manager->persist($playRecord);
         }
@@ -60,7 +60,7 @@ class PlayRecordFixtures extends Fixture implements DependentFixtureInterface
                 ->setPlayQuality($playQualities[array_rand($playQualities)])
                 ->setDeviceType($deviceTypes[array_rand($deviceTypes)])
                 ->setPlayerVersion('2.1.0')
-                ->setPlayTime(new \DateTime('-' . rand(1, 15) . ' days'));
+                ->setPlayTime(new \DateTimeImmutable('-' . rand(1, 15) . ' days'));
 
             $manager->persist($playRecord);
         }
@@ -77,7 +77,7 @@ class PlayRecordFixtures extends Fixture implements DependentFixtureInterface
                 ->setPlayQuality($playQualities[array_rand($playQualities)])
                 ->setDeviceType($deviceTypes[array_rand($deviceTypes)])
                 ->setPlayerVersion('2.0.5')
-                ->setPlayTime(new \DateTime('-' . rand(1, 7) . ' days'));
+                ->setPlayTime(new \DateTimeImmutable('-' . rand(1, 7) . ' days'));
 
             $manager->persist($playRecord);
         }
@@ -94,7 +94,7 @@ class PlayRecordFixtures extends Fixture implements DependentFixtureInterface
                 ->setPlayQuality($playQualities[array_rand($playQualities)])
                 ->setDeviceType($deviceTypes[array_rand($deviceTypes)])
                 ->setPlayerVersion('2.1.0')
-                ->setPlayTime(new \DateTime('-' . rand(1, 3) . ' days'));
+                ->setPlayTime(new \DateTimeImmutable('-' . rand(1, 3) . ' days'));
 
             $manager->persist($playRecord);
         }
@@ -114,7 +114,7 @@ class PlayRecordFixtures extends Fixture implements DependentFixtureInterface
                 ->setPlayQuality($playQualities[array_rand($playQualities)])
                 ->setDeviceType($deviceTypes[array_rand($deviceTypes)])
                 ->setPlayerVersion('2.1.0')
-                ->setPlayTime(new \DateTime('-' . rand(1, 12) . ' hours'));
+                ->setPlayTime(new \DateTimeImmutable('-' . rand(1, 12) . ' hours'));
 
             $manager->persist($playRecord);
         }

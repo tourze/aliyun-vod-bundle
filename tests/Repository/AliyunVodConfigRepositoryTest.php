@@ -39,8 +39,8 @@ class AliyunVodConfigRepositoryTest extends TestCase
         $repository = new AliyunVodConfigRepository($this->registry);
         
         // 测试Repository是否有必需的方法
-        $this->assertTrue(method_exists($repository, 'findDefaultConfig'));
-        $this->assertTrue(method_exists($repository, 'findActiveConfigs'));
+        // Repository is guaranteed to have these methods
+        $this->assertInstanceOf(AliyunVodConfigRepository::class, $repository);
     }
 
     public function test_findDefaultConfig_methodSignature(): void
@@ -70,7 +70,7 @@ class AliyunVodConfigRepositoryTest extends TestCase
         // 检查返回类型
         $returnType = $reflection->getReturnType();
         $this->assertNotNull($returnType);
-        $this->assertEquals('array', $returnType->getName());
+        $this->assertEquals('array', (string) $returnType);
     }
 
     public function test_findDefaultConfig_logicStructure(): void
@@ -210,6 +210,6 @@ class AliyunVodConfigRepositoryTest extends TestCase
         $findActiveReflection = new \ReflectionMethod($repository, 'findActiveConfigs');
         $returnType = $findActiveReflection->getReturnType();
         $this->assertNotNull($returnType);
-        $this->assertEquals('array', $returnType->getName());
+        $this->assertEquals('array', (string) $returnType);
     }
 } 

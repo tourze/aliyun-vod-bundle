@@ -34,7 +34,7 @@ class VodClientFactoryTest extends TestCase
             ->setValid(true);
 
         // 由于实际的阿里云SDK可能不可用，我们主要测试方法存在性和基本逻辑
-        $this->assertTrue(method_exists($this->factory, 'createClient'));
+        $this->assertInstanceOf(VodClientFactory::class, $this->factory);
         
         // 测试参数类型
         $reflection = new \ReflectionMethod($this->factory, 'createClient');
@@ -58,7 +58,7 @@ class VodClientFactoryTest extends TestCase
         // 检查参数类型
         $paramType = $parameters[0]->getType();
         $this->assertNotNull($paramType);
-        $this->assertEquals(AliyunVodConfig::class, $paramType->getName());
+        $this->assertEquals(AliyunVodConfig::class, (string) $paramType);
     }
 
     public function test_createClient_withInvalidConfig(): void
@@ -132,7 +132,7 @@ class VodClientFactoryTest extends TestCase
     public function test_factory_methodExists(): void
     {
         // 测试工厂类必需的方法存在
-        $this->assertTrue(method_exists($this->factory, 'createClient'));
+        $this->assertInstanceOf(VodClientFactory::class, $this->factory);
         
         // 通过反射检查方法的可见性
         $reflection = new \ReflectionClass($this->factory);
@@ -166,7 +166,7 @@ class VodClientFactoryTest extends TestCase
         
         $paramType = $configParam->getType();
         $this->assertInstanceOf(\ReflectionNamedType::class, $paramType);
-        $this->assertEquals(AliyunVodConfig::class, $paramType->getName());
+        $this->assertEquals(AliyunVodConfig::class, (string) $paramType);
     }
 
     public function test_createClient_returnTypeValidation(): void
@@ -179,7 +179,7 @@ class VodClientFactoryTest extends TestCase
         $this->assertInstanceOf(\ReflectionNamedType::class, $returnType);
         
         // 返回类型应该是阿里云VOD客户端类型
-        $returnTypeName = $returnType->getName();
+        $returnTypeName = (string) $returnType;
         $this->assertNotEmpty($returnTypeName);
     }
 

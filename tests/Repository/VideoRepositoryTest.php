@@ -37,9 +37,8 @@ class VideoRepositoryTest extends TestCase
     {
         $repository = new VideoRepository($this->registry);
         
-        $this->assertTrue(method_exists($repository, 'findByVideoId'));
-        $this->assertTrue(method_exists($repository, 'findValidVideos'));
-        $this->assertTrue(method_exists($repository, 'findByStatus'));
+        // Repository is guaranteed to have these methods
+        $this->assertInstanceOf(VideoRepository::class, $repository);
     }
 
     public function test_findByVideoId_methodSignature(): void
@@ -52,7 +51,7 @@ class VideoRepositoryTest extends TestCase
         
         $parameters = $reflection->getParameters();
         $this->assertEquals('videoId', $parameters[0]->getName());
-        $this->assertEquals('string', $parameters[0]->getType()->getName());
+        $this->assertEquals('string', (string) $parameters[0]->getType());
     }
 
     public function test_findValidVideos_methodSignature(): void
@@ -65,7 +64,7 @@ class VideoRepositoryTest extends TestCase
         
         $returnType = $reflection->getReturnType();
         $this->assertNotNull($returnType);
-        $this->assertEquals('array', $returnType->getName());
+        $this->assertEquals('array', (string) $returnType);
     }
 
     public function test_findByStatus_methodSignature(): void
@@ -78,7 +77,7 @@ class VideoRepositoryTest extends TestCase
         
         $parameters = $reflection->getParameters();
         $this->assertEquals('status', $parameters[0]->getName());
-        $this->assertEquals('string', $parameters[0]->getType()->getName());
+        $this->assertEquals('string', (string) $parameters[0]->getType());
     }
 
     public function test_findByVideoId_logicStructure(): void
@@ -180,7 +179,7 @@ class VideoRepositoryTest extends TestCase
         foreach ($statuses as $status) {
             $repository->setMockResult([]);
             $result = $repository->findByStatus($status);
-            $this->assertIsArray($result);
+            $this->assertEquals([], $result);
         }
     }
 
@@ -220,12 +219,12 @@ class VideoRepositoryTest extends TestCase
         $findValidReflection = new \ReflectionMethod($repository, 'findValidVideos');
         $returnType = $findValidReflection->getReturnType();
         $this->assertNotNull($returnType);
-        $this->assertEquals('array', $returnType->getName());
+        $this->assertEquals('array', (string) $returnType);
         
         // 检查findByStatus的返回类型
         $findByStatusReflection = new \ReflectionMethod($repository, 'findByStatus');
         $returnType = $findByStatusReflection->getReturnType();
         $this->assertNotNull($returnType);
-        $this->assertEquals('array', $returnType->getName());
+        $this->assertEquals('array', (string) $returnType);
     }
 } 

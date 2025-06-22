@@ -24,8 +24,8 @@ class AliyunVodConfigTest extends TestCase
         $this->assertEquals('cn-shanghai', $config->getRegionId());
         $this->assertFalse($config->isDefault());
         $this->assertTrue($config->isValid());
-        $this->assertInstanceOf(\DateTimeImmutable::class, $config->getCreatedTime());
-        $this->assertInstanceOf(\DateTimeImmutable::class, $config->getUpdatedTime());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $config->getCreateTime());
+        $this->assertInstanceOf(\DateTimeImmutable::class, $config->getUpdateTime());
     }
 
     public function test_setName_withValidName(): void
@@ -171,13 +171,13 @@ class AliyunVodConfigTest extends TestCase
 
     public function test_updatedTime_isUpdatedOnPropertyChange(): void
     {
-        $originalTime = $this->config->getUpdatedTime();
+        $originalTime = $this->config->getUpdateTime();
         
         // 等待一毫秒确保时间不同
         usleep(1000);
         
         $this->config->setName('新名称');
-        $newTime = $this->config->getUpdatedTime();
+        $newTime = $this->config->getUpdateTime();
         
         $this->assertGreaterThan($originalTime, $newTime);
     }
@@ -224,31 +224,31 @@ class AliyunVodConfigTest extends TestCase
 
     public function test_createdTime_isImmutable(): void
     {
-        $originalTime = $this->config->getCreatedTime();
+        $originalTime = $this->config->getCreateTime();
         
         // 尝试修改其他属性
         $this->config->setName('测试');
         
         // 创建时间应该保持不变
-        $this->assertEquals($originalTime, $this->config->getCreatedTime());
+        $this->assertEquals($originalTime, $this->config->getCreateTime());
     }
 
     public function test_multipleUpdates_updateTimestamp(): void
     {
         $times = [];
-        $times[] = $this->config->getUpdatedTime();
+        $times[] = $this->config->getUpdateTime();
         
         usleep(1000);
         $this->config->setName('第一次更新');
-        $times[] = $this->config->getUpdatedTime();
+        $times[] = $this->config->getUpdateTime();
         
         usleep(1000);
         $this->config->setRegionId('cn-beijing');
-        $times[] = $this->config->getUpdatedTime();
+        $times[] = $this->config->getUpdateTime();
         
         usleep(1000);
         $this->config->setValid(false);
-        $times[] = $this->config->getUpdatedTime();
+        $times[] = $this->config->getUpdateTime();
         
         // 每次更新时间都应该递增
         $this->assertGreaterThan($times[0], $times[1]);
