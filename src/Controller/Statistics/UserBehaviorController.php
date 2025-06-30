@@ -18,7 +18,7 @@ class UserBehaviorController extends AbstractController
     ) {
     }
 
-    #[Route('/admin/statistics/user-behavior', name: 'admin_statistics_user_behavior', methods: ['POST'])]
+    #[Route(path: '/admin/statistics/user-behavior', name: 'admin_statistics_user_behavior', methods: ['POST'])]
     public function __invoke(Request $request): JsonResponse
     {
         try {

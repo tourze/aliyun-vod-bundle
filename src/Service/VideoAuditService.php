@@ -6,6 +6,7 @@ use AlibabaCloud\SDK\Vod\V20170321\Models\GetAIMediaAuditJobRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\GetMediaAuditResultRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\SubmitAIMediaAuditJobRequest;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
+use Tourze\AliyunVodBundle\Exception\AliyunVodException;
 
 /**
  * 视频审核服务
@@ -26,9 +27,9 @@ class VideoAuditService
         ?string $templateId = null,
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -55,9 +56,9 @@ class VideoAuditService
         string $jobId,
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -75,11 +76,15 @@ class VideoAuditService
                 'mediaId' => $response->body->mediaAuditJob->mediaId,
                 'type' => $response->body->mediaAuditJob->type,
                 'status' => $response->body->mediaAuditJob->status,
-                'code' => property_exists($response->body->mediaAuditJob, 'code') ? $response->body->mediaAuditJob->code : null,
-                'message' => property_exists($response->body->mediaAuditJob, 'message') ? $response->body->mediaAuditJob->message : null,
+                /** @phpstan-ignore-next-line */
+                'code' => $response->body->mediaAuditJob->code ?? null,
+                /** @phpstan-ignore-next-line */
+                'message' => $response->body->mediaAuditJob->message ?? null,
                 'creationTime' => $response->body->mediaAuditJob->creationTime,
-                'completeTime' => property_exists($response->body->mediaAuditJob, 'completeTime') ? $response->body->mediaAuditJob->completeTime : null,
-                'data' => property_exists($response->body->mediaAuditJob, 'data') ? $response->body->mediaAuditJob->data : null,
+                /** @phpstan-ignore-next-line */
+                'completeTime' => $response->body->mediaAuditJob->completeTime ?? null,
+                /** @phpstan-ignore-next-line */
+                'data' => $response->body->mediaAuditJob->data ?? null,
             ],
         ];
     }
@@ -91,9 +96,9 @@ class VideoAuditService
         string $mediaId,
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -107,12 +112,18 @@ class VideoAuditService
         return [
             'requestId' => $response->body->requestId,
             'mediaAuditResult' => [
-                'abnormalModules' => property_exists($response->body->mediaAuditResult, 'abnormalModules') ? $response->body->mediaAuditResult->abnormalModules : '',
-                'label' => property_exists($response->body->mediaAuditResult, 'label') ? $response->body->mediaAuditResult->label : '',
-                'suggestion' => property_exists($response->body->mediaAuditResult, 'suggestion') ? $response->body->mediaAuditResult->suggestion : '',
-                'imageResult' => $this->formatImageResult(property_exists($response->body->mediaAuditResult, 'imageResult') ? $response->body->mediaAuditResult->imageResult : []),
-                'textResult' => $this->formatTextResult(property_exists($response->body->mediaAuditResult, 'textResult') ? $response->body->mediaAuditResult->textResult : []),
-                'videoResult' => $this->formatVideoResult(property_exists($response->body->mediaAuditResult, 'videoResult') ? $response->body->mediaAuditResult->videoResult : null),
+                /** @phpstan-ignore-next-line */
+                'abnormalModules' => $response->body->mediaAuditResult->abnormalModules ?? '',
+                /** @phpstan-ignore-next-line */
+                'label' => $response->body->mediaAuditResult->label ?? '',
+                /** @phpstan-ignore-next-line */
+                'suggestion' => $response->body->mediaAuditResult->suggestion ?? '',
+                /** @phpstan-ignore-next-line */
+                'imageResult' => $this->formatImageResult($response->body->mediaAuditResult->imageResult ?? []),
+                /** @phpstan-ignore-next-line */
+                'textResult' => $this->formatTextResult($response->body->mediaAuditResult->textResult ?? []),
+                /** @phpstan-ignore-next-line */
+                'videoResult' => $this->formatVideoResult($response->body->mediaAuditResult->videoResult ?? null),
             ],
         ];
     }

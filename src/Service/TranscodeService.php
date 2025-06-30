@@ -5,6 +5,7 @@ namespace Tourze\AliyunVodBundle\Service;
 use AlibabaCloud\SDK\Vod\V20170321\Models\GetTranscodeTaskRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\SubmitTranscodeJobsRequest;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
+use Tourze\AliyunVodBundle\Exception\AliyunVodException;
 
 /**
  * 视频转码服务
@@ -25,15 +26,15 @@ class TranscodeService
         ?string $templateGroupId = null,
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
 
         // 如果没有指定模板组ID，使用配置中的默认模板组ID
-        $templateGroupId = $templateGroupId ?: $config->getTemplateGroupId();
+        $templateGroupId = $templateGroupId ?? $config->getTemplateGroupId();
 
         $request = new SubmitTranscodeJobsRequest([
             'videoId' => $videoId,
@@ -55,9 +56,9 @@ class TranscodeService
         string $transcodeTaskId,
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -75,7 +76,7 @@ class TranscodeService
             'taskStatus' => $task->taskStatus,
             'creationTime' => $task->creationTime,
             'completeTime' => $task->completeTime,
-            'transcodeJobInfoList' => $this->formatTranscodeJobInfoList($task->transcodeJobInfoList ?: []),
+            'transcodeJobInfoList' => $this->formatTranscodeJobInfoList($task->transcodeJobInfoList),
         ];
     }
 

@@ -4,6 +4,7 @@ namespace Tourze\AliyunVodBundle\Service;
 
 use AlibabaCloud\SDK\Vod\V20170321\Models\GetVideoPlayAuthRequest;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
+use Tourze\AliyunVodBundle\Exception\AliyunVodException;
 
 /**
  * 播放凭证服务
@@ -24,9 +25,9 @@ class PlayAuthService
         ?int $authInfoTimeout = 3000,
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);

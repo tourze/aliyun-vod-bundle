@@ -17,7 +17,7 @@ class IndexController extends AbstractController
     ) {
     }
 
-    #[Route('/admin/video-upload', name: 'admin_video_upload_index')]
+    #[Route(path: '/admin/video-upload', name: 'admin_video_upload_index')]
     public function __invoke(): Response
     {
         $configs = $this->configService->getActiveConfigs();

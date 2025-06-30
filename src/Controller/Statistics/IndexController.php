@@ -17,7 +17,7 @@ class IndexController extends AbstractController
     ) {
     }
 
-    #[Route('/admin/statistics', name: 'admin_statistics_index')]
+    #[Route(path: '/admin/statistics', name: 'admin_statistics_index')]
     public function __invoke(): Response
     {
         $realTimeStats = $this->statisticsService->getRealTimeStats();

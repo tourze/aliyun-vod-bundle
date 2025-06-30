@@ -18,7 +18,7 @@ class RangeController extends AbstractController
     ) {
     }
 
-    #[Route('/admin/statistics/range', name: 'admin_statistics_range', methods: ['POST'])]
+    #[Route(path: '/admin/statistics/range', name: 'admin_statistics_range', methods: ['POST'])]
     public function __invoke(Request $request): JsonResponse
     {
         try {

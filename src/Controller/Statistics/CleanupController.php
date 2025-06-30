@@ -18,7 +18,7 @@ class CleanupController extends AbstractController
     ) {
     }
 
-    #[Route('/admin/statistics/cleanup', name: 'admin_statistics_cleanup', methods: ['POST'])]
+    #[Route(path: '/admin/statistics/cleanup', name: 'admin_statistics_cleanup', methods: ['POST'])]
     public function __invoke(Request $request): JsonResponse
     {
         try {

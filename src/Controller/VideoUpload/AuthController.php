@@ -20,7 +20,7 @@ class AuthController extends AbstractController
     ) {
     }
 
-    #[Route('/admin/video-upload/auth', name: 'admin_video_upload_auth', methods: ['POST'])]
+    #[Route(path: '/admin/video-upload/auth', name: 'admin_video_upload_auth', methods: ['POST'])]
     public function __invoke(Request $request): JsonResponse
     {
         try {

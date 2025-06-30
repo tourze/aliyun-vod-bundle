@@ -5,6 +5,7 @@ namespace Tourze\AliyunVodBundle\Service;
 use AlibabaCloud\SDK\Vod\V20170321\Models\CreateUploadVideoRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\RefreshUploadVideoRequest;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
+use Tourze\AliyunVodBundle\Exception\AliyunVodException;
 
 /**
  * 视频上传服务
@@ -27,9 +28,9 @@ class VideoUploadService
         ?string $tags = null,
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -60,9 +61,9 @@ class VideoUploadService
         string $videoId,
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);

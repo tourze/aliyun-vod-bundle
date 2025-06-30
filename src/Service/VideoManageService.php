@@ -7,6 +7,7 @@ use AlibabaCloud\SDK\Vod\V20170321\Models\GetPlayInfoRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\GetVideoInfoRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\UpdateVideoInfoRequest;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
+use Tourze\AliyunVodBundle\Exception\AliyunVodException;
 
 /**
  * 视频管理服务
@@ -26,9 +27,9 @@ class VideoManageService
         string $videoId,
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -62,9 +63,9 @@ class VideoManageService
         string $videoId,
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -112,9 +113,9 @@ class VideoManageService
         ?string $tags = null,
         ?AliyunVodConfig $config = null
     ): bool {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -138,9 +139,9 @@ class VideoManageService
         string $videoIds,
         ?AliyunVodConfig $config = null
     ): bool {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);

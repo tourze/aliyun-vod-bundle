@@ -170,31 +170,7 @@ class AliyunVodConfigRepositoryTest extends TestCase
         $this->assertEquals(\Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository::class, $parentClass->getName());
     }
 
-    public function test_findDefaultConfig_criteriaValidation(): void
-    {
-        // 测试findDefaultConfig使用的查询条件
-        $expectedCriteria = [
-            'isDefault' => true,
-            'valid' => true,
-        ];
-        
-        // 通过代码分析验证条件的合理性
-        $this->assertTrue($expectedCriteria['isDefault']);
-        $this->assertTrue($expectedCriteria['valid']);
-        $this->assertCount(2, $expectedCriteria);
-    }
 
-    public function test_findActiveConfigs_criteriaValidation(): void
-    {
-        // 测试findActiveConfigs使用的查询条件和排序
-        $expectedCriteria = ['valid' => true];
-        $expectedOrderBy = ['isDefault' => 'DESC', 'name' => 'ASC'];
-        
-        // 验证条件的合理性
-        $this->assertTrue($expectedCriteria['valid']);
-        $this->assertEquals('DESC', $expectedOrderBy['isDefault']); // 默认配置排在前面
-        $this->assertEquals('ASC', $expectedOrderBy['name']); // 名称升序排列
-    }
 
     public function test_repository_methodsReturnTypes(): void
     {

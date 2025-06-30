@@ -9,6 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Tourze\AliyunVodBundle\Exception\StatisticsGenerationException;
 use Tourze\AliyunVodBundle\Service\StatisticsService;
 
 /**
@@ -95,7 +96,7 @@ class GenerateStatisticsCommand extends Command
             case 'monthly':
                 return $this->generateMonthlyStatistics($targetDate);
             default:
-                throw new \InvalidArgumentException("不支持的统计类型: {$type}");
+                throw new StatisticsGenerationException("不支持的统计类型: {$type}");
         }
     }
 
@@ -189,7 +190,7 @@ class GenerateStatisticsCommand extends Command
                 $this->outputToCsv($statistics, $file, $io);
                 break;
             default:
-                throw new \InvalidArgumentException("不支持的输出格式: {$format}");
+                throw new StatisticsGenerationException("不支持的输出格式: {$format}");
         }
     }
 

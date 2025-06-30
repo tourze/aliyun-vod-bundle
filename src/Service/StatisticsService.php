@@ -70,11 +70,11 @@ class StatisticsService
             }
 
             // 设备类型统计
-            $deviceType = $record->getDeviceType() ?: 'Unknown';
+            $deviceType = $record->getDeviceType() ?? 'Unknown';
             $deviceStats[$deviceType] = ($deviceStats[$deviceType] ?? 0) + 1;
 
             // 播放质量统计
-            $quality = $record->getPlayQuality() ?: 'Unknown';
+            $quality = $record->getPlayQuality() ?? 'Unknown';
             $qualityStats[$quality] = ($qualityStats[$quality] ?? 0) + 1;
         }
 
@@ -116,7 +116,7 @@ class StatisticsService
 
             $uniqueVideos[$record->getVideo()->getId()] = true;
 
-            $deviceType = $record->getDeviceType() ?: 'Unknown';
+            $deviceType = $record->getDeviceType() ?? 'Unknown';
             $deviceStats[$deviceType] = ($deviceStats[$deviceType] ?? 0) + 1;
         }
 
@@ -151,7 +151,7 @@ class StatisticsService
                 $validDurationCount++;
             }
 
-            $quality = $record->getPlayQuality() ?: 'Unknown';
+            $quality = $record->getPlayQuality() ?? 'Unknown';
             $preferredQuality[$quality] = ($preferredQuality[$quality] ?? 0) + 1;
         }
 
@@ -215,7 +215,7 @@ class StatisticsService
             }
         }
 
-        $completionRate = $totalPlays > 0 ? round(($completedPlays / $totalPlays) * 100, 2) : 0;
+        $completionRate = round(($completedPlays / $totalPlays) * 100, 2);
 
         return [
             'videoId' => $video->getVideoId(),

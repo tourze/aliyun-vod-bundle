@@ -19,7 +19,7 @@ class VideoDetailController extends AbstractController
     ) {
     }
 
-    #[Route('/admin/statistics/video/{id}', name: 'admin_statistics_video_detail')]
+    #[Route(path: '/admin/statistics/video/{id}', name: 'admin_statistics_video_detail')]
     public function __invoke(int $id): Response
     {
         $video = $this->videoRepository->find($id);

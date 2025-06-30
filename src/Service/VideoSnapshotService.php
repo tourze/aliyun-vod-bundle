@@ -5,6 +5,7 @@ namespace Tourze\AliyunVodBundle\Service;
 use AlibabaCloud\SDK\Vod\V20170321\Models\ListSnapshotsRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\SubmitSnapshotJobRequest;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
+use Tourze\AliyunVodBundle\Exception\AliyunVodException;
 
 /**
  * 视频截图服务
@@ -27,9 +28,9 @@ class VideoSnapshotService
         ?int $interval = null,
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -53,7 +54,8 @@ class VideoSnapshotService
         return [
             'requestId' => $response->body->requestId,
             'snapshotJob' => [
-                'jobId' => property_exists($response->body->snapshotJob, 'jobId') ? $response->body->snapshotJob->jobId : null,
+                /** @phpstan-ignore-next-line */
+                'jobId' => $response->body->snapshotJob->jobId ?? null,
             ],
         ];
     }
@@ -68,9 +70,9 @@ class VideoSnapshotService
         ?int $pageSize = 20,
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -85,7 +87,8 @@ class VideoSnapshotService
         $response = $client->listSnapshots($request);
 
         $snapshots = [];
-        if (property_exists($response->body->mediaSnapshot, 'snapshots')) {
+        /** @phpstan-ignore-next-line */
+        if (isset($response->body->mediaSnapshot->snapshots)) {
             foreach ($response->body->mediaSnapshot->snapshots->snapshot as $snapshot) {
                 $snapshots[] = [
                     'url' => $snapshot->url,
@@ -97,8 +100,10 @@ class VideoSnapshotService
         return [
             'requestId' => $response->body->requestId,
             'mediaSnapshot' => [
-                'total' => property_exists($response->body->mediaSnapshot, 'total') ? $response->body->mediaSnapshot->total : 0,
-                'regular' => property_exists($response->body->mediaSnapshot, 'regular') ? $response->body->mediaSnapshot->regular : '',
+                /** @phpstan-ignore-next-line */
+                'total' => $response->body->mediaSnapshot->total ?? 0,
+                /** @phpstan-ignore-next-line */
+                'regular' => $response->body->mediaSnapshot->regular ?? '',
                 'snapshots' => $snapshots,
             ],
         ];

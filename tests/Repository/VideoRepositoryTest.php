@@ -183,27 +183,7 @@ class VideoRepositoryTest extends TestCase
         }
     }
 
-    public function test_repository_criteriaValidation(): void
-    {
-        // 测试findValidVideos的查询条件
-        $expectedCriteria = ['valid' => true];
-        $expectedOrderBy = ['createdTime' => 'DESC'];
-        
-        $this->assertTrue($expectedCriteria['valid']);
-        $this->assertEquals('DESC', $expectedOrderBy['createdTime']);
-    }
 
-    public function test_repository_statusCriteriaValidation(): void
-    {
-        // 测试findByStatus的查询条件
-        $testStatus = 'Normal';
-        $expectedCriteria = ['status' => $testStatus, 'valid' => true];
-        $expectedOrderBy = ['createdTime' => 'DESC'];
-        
-        $this->assertEquals($testStatus, $expectedCriteria['status']);
-        $this->assertTrue($expectedCriteria['valid']);
-        $this->assertEquals('DESC', $expectedOrderBy['createdTime']);
-    }
 
     public function test_repository_methodsReturnTypes(): void
     {

@@ -17,7 +17,7 @@ class ProgressController extends AbstractController
     ) {
     }
 
-    #[Route('/admin/video-upload/progress/{videoId}', name: 'admin_video_upload_progress', methods: ['GET'])]
+    #[Route(path: '/admin/video-upload/progress/{videoId}', name: 'admin_video_upload_progress', methods: ['GET'])]
     public function __invoke(string $videoId): JsonResponse
     {
         try {

@@ -8,6 +8,7 @@ use AlibabaCloud\SDK\Vod\V20170321\Models\GetWatermarkRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\ListWatermarkRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\UpdateWatermarkRequest;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
+use Tourze\AliyunVodBundle\Exception\AliyunVodException;
 
 /**
  * 视频水印服务
@@ -29,9 +30,9 @@ class VideoWatermarkService
         string $type = 'Image',
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -65,9 +66,9 @@ class VideoWatermarkService
         ?string $watermarkConfig = null,
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -102,9 +103,9 @@ class VideoWatermarkService
         string $watermarkId,
         ?AliyunVodConfig $config = null
     ): bool {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -123,9 +124,9 @@ class VideoWatermarkService
      */
     public function listWatermarks(?AliyunVodConfig $config = null): array
     {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -134,7 +135,8 @@ class VideoWatermarkService
         $response = $client->listWatermark($request);
 
         $watermarks = [];
-        if (property_exists($response->body, 'watermarkInfos')) {
+        /** @phpstan-ignore-next-line */
+        if (isset($response->body->watermarkInfos)) {
             foreach ($response->body->watermarkInfos as $watermark) {
                 $watermarks[] = [
                     'watermarkId' => $watermark->watermarkId,
@@ -159,9 +161,9 @@ class VideoWatermarkService
         string $watermarkId,
         ?AliyunVodConfig $config = null
     ): array {
-        $config = $config ?: $this->configService->getDefaultConfig();
+        $config = $config ?? $this->configService->getDefaultConfig();
         if ($config === null) {
-            throw new \RuntimeException('未找到可用的阿里云VOD配置');
+            throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
@@ -179,7 +181,8 @@ class VideoWatermarkService
                 'name' => $response->body->watermarkInfo->name,
                 'type' => $response->body->watermarkInfo->type,
                 'watermarkConfig' => $response->body->watermarkInfo->watermarkConfig,
-                'fileUrl' => property_exists($response->body->watermarkInfo, 'fileUrl') ? $response->body->watermarkInfo->fileUrl : null,
+                /** @phpstan-ignore-next-line */
+                'fileUrl' => $response->body->watermarkInfo->fileUrl ?? null,
                 'isDefault' => $response->body->watermarkInfo->isDefault,
                 'creationTime' => $response->body->watermarkInfo->creationTime,
             ],

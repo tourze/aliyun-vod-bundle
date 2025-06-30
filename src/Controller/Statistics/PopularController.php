@@ -18,7 +18,7 @@ class PopularController extends AbstractController
     ) {
     }
 
-    #[Route('/admin/statistics/popular', name: 'admin_statistics_popular', methods: ['GET'])]
+    #[Route(path: '/admin/statistics/popular', name: 'admin_statistics_popular', methods: ['GET'])]
     public function __invoke(Request $request): JsonResponse
     {
         try {

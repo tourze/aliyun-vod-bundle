@@ -20,7 +20,7 @@ class RefreshAuthController extends AbstractController
     ) {
     }
 
-    #[Route('/admin/video-upload/refresh-auth', name: 'admin_video_upload_refresh_auth', methods: ['POST'])]
+    #[Route(path: '/admin/video-upload/refresh-auth', name: 'admin_video_upload_refresh_auth', methods: ['POST'])]
     public function __invoke(Request $request): JsonResponse
     {
         try {

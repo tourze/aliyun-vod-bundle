@@ -18,7 +18,7 @@ use Tourze\AliyunVodBundle\Controller\VideoUpload\ProgressController;
 use Tourze\AliyunVodBundle\Controller\VideoUpload\RefreshAuthController;
 use Tourze\RoutingAutoLoaderBundle\Service\RoutingAutoLoaderInterface;
 
-#[AutoconfigureTag('routing.loader')]
+#[AutoconfigureTag(name: 'routing.loader')]
 class AttributeControllerLoader extends Loader implements RoutingAutoLoaderInterface
 {
     private AttributeRouteControllerLoader $controllerLoader;
