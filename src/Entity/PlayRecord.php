@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Tourze\AliyunVodBundle\Repository\PlayRecordRepository;
 use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
 
@@ -19,36 +22,47 @@ class PlayRecord implements \Stringable
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => '主键ID'])]
     private int $id = 0;
 
-    #[ORM\ManyToOne(targetEntity: Video::class)]
+    #[ORM\ManyToOne(targetEntity: Video::class, cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false, options: ['comment' => '关联的视频'])]
+    #[Assert\NotNull]
     private Video $video;
 
     #[ORM\Column(type: Types::STRING, length: 45, nullable: true, options: ['comment' => '播放者IP地址'])]
+    #[Assert\Length(max: 45)]
+    #[Assert\Ip]
     private ?string $ipAddress = null;
 
     #[ORM\Column(type: Types::STRING, length: 500, nullable: true, options: ['comment' => '用户代理'])]
+    #[Assert\Length(max: 500)]
     private ?string $userAgent = null;
 
     #[ORM\Column(type: Types::STRING, length: 255, nullable: true, options: ['comment' => '来源页面'])]
+    #[Assert\Length(max: 255)]
     private ?string $referer = null;
 
     #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['comment' => '播放时长（秒）'])]
+    #[Assert\Range(min: 0, max: 86400)]
     private ?int $playDuration = null;
 
     #[ORM\Column(type: Types::INTEGER, nullable: true, options: ['comment' => '播放进度（秒）'])]
+    #[Assert\Range(min: 0)]
     private ?int $playPosition = null;
 
     #[ORM\Column(type: Types::STRING, length: 50, nullable: true, options: ['comment' => '播放质量'])]
+    #[Assert\Length(max: 50)]
     private ?string $playQuality = null;
 
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true, options: ['comment' => '播放设备类型'])]
+    #[Assert\Length(max: 100)]
     private ?string $deviceType = null;
 
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true, options: ['comment' => '播放器版本'])]
+    #[Assert\Length(max: 100)]
     private ?string $playerVersion = null;
 
     #[CreateTimeColumn]
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, options: ['comment' => '播放时间'])]
+    #[Assert\NotNull]
     private \DateTimeImmutable $playTime;
 
     public function __construct()
@@ -59,6 +73,7 @@ class PlayRecord implements \Stringable
     public function __toString(): string
     {
         $videoTitle = isset($this->video) ? $this->video->getTitle() : '未知视频';
+
         return sprintf('播放记录 - %s', $videoTitle);
     }
 
@@ -72,10 +87,9 @@ class PlayRecord implements \Stringable
         return $this->video;
     }
 
-    public function setVideo(Video $video): self
+    public function setVideo(Video $video): void
     {
         $this->video = $video;
-        return $this;
     }
 
     public function getIpAddress(): ?string
@@ -83,10 +97,9 @@ class PlayRecord implements \Stringable
         return $this->ipAddress;
     }
 
-    public function setIpAddress(?string $ipAddress): self
+    public function setIpAddress(?string $ipAddress): void
     {
         $this->ipAddress = $ipAddress;
-        return $this;
     }
 
     public function getUserAgent(): ?string
@@ -94,10 +107,9 @@ class PlayRecord implements \Stringable
         return $this->userAgent;
     }
 
-    public function setUserAgent(?string $userAgent): self
+    public function setUserAgent(?string $userAgent): void
     {
         $this->userAgent = $userAgent;
-        return $this;
     }
 
     public function getReferer(): ?string
@@ -105,10 +117,9 @@ class PlayRecord implements \Stringable
         return $this->referer;
     }
 
-    public function setReferer(?string $referer): self
+    public function setReferer(?string $referer): void
     {
         $this->referer = $referer;
-        return $this;
     }
 
     public function getPlayDuration(): ?int
@@ -116,10 +127,9 @@ class PlayRecord implements \Stringable
         return $this->playDuration;
     }
 
-    public function setPlayDuration(?int $playDuration): self
+    public function setPlayDuration(?int $playDuration): void
     {
         $this->playDuration = $playDuration;
-        return $this;
     }
 
     public function getPlayPosition(): ?int
@@ -127,10 +137,9 @@ class PlayRecord implements \Stringable
         return $this->playPosition;
     }
 
-    public function setPlayPosition(?int $playPosition): self
+    public function setPlayPosition(?int $playPosition): void
     {
         $this->playPosition = $playPosition;
-        return $this;
     }
 
     public function getPlayQuality(): ?string
@@ -138,10 +147,9 @@ class PlayRecord implements \Stringable
         return $this->playQuality;
     }
 
-    public function setPlayQuality(?string $playQuality): self
+    public function setPlayQuality(?string $playQuality): void
     {
         $this->playQuality = $playQuality;
-        return $this;
     }
 
     public function getDeviceType(): ?string
@@ -149,10 +157,9 @@ class PlayRecord implements \Stringable
         return $this->deviceType;
     }
 
-    public function setDeviceType(?string $deviceType): self
+    public function setDeviceType(?string $deviceType): void
     {
         $this->deviceType = $deviceType;
-        return $this;
     }
 
     public function getPlayerVersion(): ?string
@@ -160,10 +167,9 @@ class PlayRecord implements \Stringable
         return $this->playerVersion;
     }
 
-    public function setPlayerVersion(?string $playerVersion): self
+    public function setPlayerVersion(?string $playerVersion): void
     {
         $this->playerVersion = $playerVersion;
-        return $this;
     }
 
     public function getPlayTime(): \DateTimeImmutable
@@ -171,9 +177,8 @@ class PlayRecord implements \Stringable
         return $this->playTime;
     }
 
-    public function setPlayTime(\DateTimeImmutable $playTime): self
+    public function setPlayTime(\DateTimeImmutable $playTime): void
     {
         $this->playTime = $playTime;
-        return $this;
     }
 }

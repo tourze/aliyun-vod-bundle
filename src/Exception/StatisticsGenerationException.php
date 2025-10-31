@@ -7,6 +7,6 @@ namespace Tourze\AliyunVodBundle\Exception;
 /**
  * 统计生成异常
  */
-class StatisticsGenerationException extends InvalidConfigurationException
+class StatisticsGenerationException extends \RuntimeException
 {
-} 
+}

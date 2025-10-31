@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Controller\Statistics;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,10 +13,10 @@ use Tourze\AliyunVodBundle\Service\StatisticsService;
 /**
  * 获取热门视频排行控制器
  */
-class PopularController extends AbstractController
+final class PopularController extends AbstractController
 {
     public function __construct(
-        private readonly StatisticsService $statisticsService
+        private readonly StatisticsService $statisticsService,
     ) {
     }
 
@@ -29,7 +31,6 @@ class PopularController extends AbstractController
                 'success' => true,
                 'data' => $popularVideos,
             ]);
-
         } catch (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,

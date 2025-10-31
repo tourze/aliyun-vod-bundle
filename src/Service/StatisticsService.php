@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -10,11 +12,11 @@ use Tourze\AliyunVodBundle\Repository\PlayRecordRepository;
 /**
  * 播放统计服务
  */
-class StatisticsService
+readonly class StatisticsService
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly PlayRecordRepository $playRecordRepository
+        private EntityManagerInterface $entityManager,
+        private PlayRecordRepository $playRecordRepository,
     ) {
     }
 
@@ -30,18 +32,18 @@ class StatisticsService
         ?int $playPosition = null,
         ?string $playQuality = null,
         ?string $deviceType = null,
-        ?string $playerVersion = null
+        ?string $playerVersion = null,
     ): PlayRecord {
         $playRecord = new PlayRecord();
-        $playRecord->setVideo($video)
-            ->setIpAddress($ipAddress)
-            ->setUserAgent($userAgent)
-            ->setReferer($referer)
-            ->setPlayDuration($playDuration)
-            ->setPlayPosition($playPosition)
-            ->setPlayQuality($playQuality)
-            ->setDeviceType($deviceType)
-            ->setPlayerVersion($playerVersion);
+        $playRecord->setVideo($video);
+        $playRecord->setIpAddress($ipAddress);
+        $playRecord->setUserAgent($userAgent);
+        $playRecord->setReferer($referer);
+        $playRecord->setPlayDuration($playDuration);
+        $playRecord->setPlayPosition($playPosition);
+        $playRecord->setPlayQuality($playQuality);
+        $playRecord->setDeviceType($deviceType);
+        $playRecord->setPlayerVersion($playerVersion);
 
         $this->entityManager->persist($playRecord);
         $this->entityManager->flush();
@@ -51,6 +53,8 @@ class StatisticsService
 
     /**
      * 获取视频播放统计
+     *
+     * @return array{videoId: string, title: string, totalPlays: int, averagePlayDuration: float, deviceStats: array<string, int>, qualityStats: array<string, int>}
      */
     public function getVideoPlayStats(Video $video): array
     {
@@ -64,9 +68,9 @@ class StatisticsService
         $qualityStats = [];
 
         foreach ($playRecords as $record) {
-            if ($record->getPlayDuration()) {
+            if (null !== $record->getPlayDuration()) {
                 $totalDuration += $record->getPlayDuration();
-                $validDurationCount++;
+                ++$validDurationCount;
             }
 
             // 设备类型统计
@@ -92,6 +96,8 @@ class StatisticsService
 
     /**
      * 获取热门视频排行
+     *
+     * @return array<int, array{id: int, title: string, playCount: int}>
      */
     public function getPopularVideos(int $limit = 10): array
     {
@@ -100,19 +106,25 @@ class StatisticsService
 
     /**
      * 获取指定时间范围内的播放统计
+     *
+     * @return array{startDate: string, endDate: string, totalPlays: int, uniqueVideos: int, dailyStats: array<string, int>, hourlyStats: array<int, int>, deviceStats: array<string, int>}
      */
     public function getPlayStatsByDateRange(\DateTime $startDate, \DateTime $endDate): array
     {
         $playRecords = $this->playRecordRepository->findByDateRange($startDate, $endDate);
 
         $dailyStats = [];
+        $hourlyStats = [];
         $totalPlays = count($playRecords);
         $uniqueVideos = [];
         $deviceStats = [];
 
         foreach ($playRecords as $record) {
             $date = $record->getPlayTime()->format('Y-m-d');
+            $hour = (int) $record->getPlayTime()->format('H');
+
             $dailyStats[$date] = ($dailyStats[$date] ?? 0) + 1;
+            $hourlyStats[$hour] = ($hourlyStats[$hour] ?? 0) + 1;
 
             $uniqueVideos[$record->getVideo()->getId()] = true;
 
@@ -126,12 +138,15 @@ class StatisticsService
             'totalPlays' => $totalPlays,
             'uniqueVideos' => count($uniqueVideos),
             'dailyStats' => $dailyStats,
+            'hourlyStats' => $hourlyStats,
             'deviceStats' => $deviceStats,
         ];
     }
 
     /**
      * 获取用户播放行为分析
+     *
+     * @return array{ipAddress: string, totalPlays: int, uniqueVideosWatched: int, averagePlayDuration: float, preferredQuality: array<string, int>, watchedVideos: array<int, string>}
      */
     public function getUserPlayBehavior(string $ipAddress): array
     {
@@ -146,9 +161,9 @@ class StatisticsService
         foreach ($playRecords as $record) {
             $uniqueVideos[$record->getVideo()->getId()] = $record->getVideo()->getTitle();
 
-            if ($record->getPlayDuration()) {
+            if (null !== $record->getPlayDuration()) {
                 $totalDuration += $record->getPlayDuration();
-                $validDurationCount++;
+                ++$validDurationCount;
             }
 
             $quality = $record->getPlayQuality() ?? 'Unknown';
@@ -169,6 +184,8 @@ class StatisticsService
 
     /**
      * 获取实时播放统计
+     *
+     * @return array{today: array{startDate: string, endDate: string, totalPlays: int, uniqueVideos: int, dailyStats: array<string, int>, hourlyStats: array<int, int>, deviceStats: array<string, int>}, yesterday: array{startDate: string, endDate: string, totalPlays: int, uniqueVideos: int, dailyStats: array<string, int>, hourlyStats: array<int, int>, deviceStats: array<string, int>}, growth: array{plays: int, videos: int}}
      */
     public function getRealTimeStats(): array
     {
@@ -190,13 +207,15 @@ class StatisticsService
 
     /**
      * 获取视频完播率统计
+     *
+     * @return array{videoId: string, completionRate: float, totalPlays: int, completedPlays: int}
      */
     public function getVideoCompletionRate(Video $video): array
     {
         $playRecords = $this->playRecordRepository->findByVideo($video);
         $videoDuration = $video->getDuration();
 
-        if ($videoDuration === null || empty($playRecords)) {
+        if (null === $videoDuration || [] === $playRecords) {
             return [
                 'videoId' => $video->getVideoId(),
                 'completionRate' => 0,
@@ -210,8 +229,8 @@ class StatisticsService
 
         foreach ($playRecords as $record) {
             $playPosition = $record->getPlayPosition();
-            if ($playPosition && $playPosition >= $videoDuration * 0.9) { // 播放90%以上算完播
-                $completedPlays++;
+            if (null !== $playPosition && $playPosition >= $videoDuration * 0.9) { // 播放90%以上算完播
+                ++$completedPlays;
             }
         }
 
@@ -232,10 +251,11 @@ class StatisticsService
     {
         $expireDate = new \DateTime("-{$daysToKeep} days");
 
-        $qb = $this->entityManager->createQueryBuilder();
-        $qb->delete(PlayRecord::class, 'pr')
+        $qb = $this->playRecordRepository->createQueryBuilder('pr');
+        $qb->delete()
             ->where('pr.playTime < :expireDate')
-            ->setParameter('expireDate', $expireDate);
+            ->setParameter('expireDate', $expireDate)
+        ;
 
         return $qb->getQuery()->execute();
     }

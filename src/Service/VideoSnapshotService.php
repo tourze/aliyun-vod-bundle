@@ -1,35 +1,41 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Service;
 
 use AlibabaCloud\SDK\Vod\V20170321\Models\ListSnapshotsRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\SubmitSnapshotJobRequest;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
 use Tourze\AliyunVodBundle\Exception\AliyunVodException;
 
 /**
  * 视频截图服务
  */
-class VideoSnapshotService
+#[Autoconfigure(public: true)]
+readonly class VideoSnapshotService
 {
     public function __construct(
-        private readonly VodClientFactory $clientFactory,
-        private readonly AliyunVodConfigService $configService
+        private VodClientFactory $clientFactory,
+        private AliyunVodConfigService $configService,
     ) {
     }
 
     /**
      * 提交截图任务
+     *
+     * @return array{requestId: string, snapshotJob: array{jobId: string|null}}
      */
     public function submitSnapshotJob(
         string $videoId,
         ?string $snapshotTemplateId = null,
         ?int $count = 1,
         ?int $interval = null,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -40,11 +46,11 @@ class VideoSnapshotService
             'count' => $count,
         ];
 
-        if ($snapshotTemplateId !== null) {
+        if (null !== $snapshotTemplateId) {
             $requestData['snapshotTemplateId'] = $snapshotTemplateId;
         }
 
-        if ($interval !== null) {
+        if (null !== $interval) {
             $requestData['interval'] = $interval;
         }
 
@@ -54,7 +60,7 @@ class VideoSnapshotService
         return [
             'requestId' => $response->body->requestId,
             'snapshotJob' => [
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'jobId' => $response->body->snapshotJob->jobId ?? null,
             ],
         ];
@@ -62,16 +68,18 @@ class VideoSnapshotService
 
     /**
      * 获取视频截图列表
+     *
+     * @return array<string, mixed>
      */
     public function getVideoSnapshots(
         string $videoId,
         ?string $snapshotType = 'CoverSnapshot',
         ?int $pageNo = 1,
         ?int $pageSize = 20,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -87,7 +95,7 @@ class VideoSnapshotService
         $response = $client->listSnapshots($request);
 
         $snapshots = [];
-        /** @phpstan-ignore-next-line */
+        /* @phpstan-ignore-next-line */
         if (isset($response->body->mediaSnapshot->snapshots)) {
             foreach ($response->body->mediaSnapshot->snapshots->snapshot as $snapshot) {
                 $snapshots[] = [
@@ -100,9 +108,9 @@ class VideoSnapshotService
         return [
             'requestId' => $response->body->requestId,
             'mediaSnapshot' => [
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'total' => $response->body->mediaSnapshot->total ?? 0,
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'regular' => $response->body->mediaSnapshot->regular ?? '',
                 'snapshots' => $snapshots,
             ],
@@ -111,13 +119,15 @@ class VideoSnapshotService
 
     /**
      * 生成指定时间点的截图
+     *
+     * @return array{requestId: string, snapshotJob: array{jobId: string|null}}
      */
     public function generateSnapshotAtTime(
         string $videoId,
         int $timePoint,
         ?int $width = 800,
         ?int $height = 600,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
         // 提交截图任务，指定时间点
         return $this->submitSnapshotJob(
@@ -131,11 +141,15 @@ class VideoSnapshotService
 
     /**
      * 批量生成截图
+     *
+     * @param array<int, string> $videoIds
+     *
+     * @return array<string, array<string, mixed>>
      */
     public function batchGenerateSnapshots(
         array $videoIds,
         ?int $count = 1,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
         $results = [];
         foreach ($videoIds as $videoId) {
@@ -148,6 +162,7 @@ class VideoSnapshotService
                 ];
             }
         }
+
         return $results;
     }
-} 
+}

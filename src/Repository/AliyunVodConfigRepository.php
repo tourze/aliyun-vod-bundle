@@ -1,14 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
+use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
 
 /**
  * 阿里云VOD配置仓储
+ *
+ * @extends ServiceEntityRepository<AliyunVodConfig>
  */
+#[AsRepository(entityClass: AliyunVodConfig::class)]
 class AliyunVodConfigRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -21,6 +27,7 @@ class AliyunVodConfigRepository extends ServiceEntityRepository
      */
     public function findDefaultConfig(): ?AliyunVodConfig
     {
+        /* @var AliyunVodConfig|null */
         return $this->findOneBy([
             'isDefault' => true,
             'valid' => true,
@@ -29,6 +36,8 @@ class AliyunVodConfigRepository extends ServiceEntityRepository
 
     /**
      * 查找所有激活的配置
+     *
+     * @return array<int, AliyunVodConfig>
      */
     public function findActiveConfigs(): array
     {
@@ -36,5 +45,23 @@ class AliyunVodConfigRepository extends ServiceEntityRepository
             ['valid' => true],
             ['isDefault' => 'DESC', 'name' => 'ASC']
         );
+    }
+
+    public function save(AliyunVodConfig $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(AliyunVodConfig $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 }

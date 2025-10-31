@@ -1,23 +1,43 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Tests\Entity;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
+use Tourze\PHPUnitDoctrineEntity\AbstractEntityTestCase;
 
 /**
  * 阿里云VOD配置实体测试
+ *
+ * @internal
  */
-class AliyunVodConfigTest extends TestCase
+#[CoversClass(AliyunVodConfig::class)]
+final class AliyunVodConfigTest extends AbstractEntityTestCase
 {
-    private AliyunVodConfig $config;
-
-    protected function setUp(): void
+    protected function createEntity(): object
     {
-        $this->config = new AliyunVodConfig();
+        return new AliyunVodConfig();
     }
 
-    public function test_construct_setsDefaultValues(): void
+    /**
+     * @return iterable<array{string, mixed}>
+     */
+    public static function propertiesProvider(): iterable
+    {
+        yield 'name' => ['name', '测试配置'];
+        yield 'accessKeyId' => ['accessKeyId', 'LTAI5tTestAccessKeyId123'];
+        yield 'accessKeySecret' => ['accessKeySecret', 'TestAccessKeySecret123456789'];
+        yield 'regionId' => ['regionId', 'cn-beijing'];
+        yield 'templateGroupId' => ['templateGroupId', 'VOD_TEMPLATE_GROUP_001'];
+        yield 'storageLocation' => ['storageLocation', 'outin-test-bucket.oss-cn-shanghai.aliyuncs.com'];
+        yield 'callbackUrl' => ['callbackUrl', 'https://example.com/vod/callback'];
+        yield 'isDefault' => ['isDefault', true];
+        yield 'valid' => ['valid', false];
+    }
+
+    public function testConstructSetsDefaultValues(): void
     {
         $config = new AliyunVodConfig();
 
@@ -28,228 +48,90 @@ class AliyunVodConfigTest extends TestCase
         $this->assertInstanceOf(\DateTimeImmutable::class, $config->getUpdateTime());
     }
 
-    public function test_setName_withValidName(): void
+    public function testUpdatedTimeIsUpdatedOnPropertyChange(): void
     {
-        $name = '测试配置';
-        $result = $this->config->setName($name);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertEquals($name, $this->config->getName());
-    }
+        $config = new AliyunVodConfig();
+        $originalTime = $config->getUpdateTime();
 
-    public function test_setName_withEmptyString(): void
-    {
-        $result = $this->config->setName('');
-        
-        $this->assertSame($this->config, $result);
-        $this->assertEquals('', $this->config->getName());
-    }
-
-    public function test_setAccessKeyId_withValidKey(): void
-    {
-        $keyId = 'LTAI5tTestAccessKeyId123';
-        $result = $this->config->setAccessKeyId($keyId);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertEquals($keyId, $this->config->getAccessKeyId());
-    }
-
-    public function test_setAccessKeySecret_withValidSecret(): void
-    {
-        $secret = 'TestAccessKeySecret123456789';
-        $result = $this->config->setAccessKeySecret($secret);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertEquals($secret, $this->config->getAccessKeySecret());
-    }
-
-    public function test_setRegionId_withValidRegion(): void
-    {
-        $regionId = 'cn-beijing';
-        $result = $this->config->setRegionId($regionId);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertEquals($regionId, $this->config->getRegionId());
-    }
-
-    public function test_setRegionId_withDefaultRegion(): void
-    {
-        // 测试默认值
-        $this->assertEquals('cn-shanghai', $this->config->getRegionId());
-        
-        // 设置新值
-        $this->config->setRegionId('cn-hangzhou');
-        $this->assertEquals('cn-hangzhou', $this->config->getRegionId());
-    }
-
-    public function test_setTemplateGroupId_withValidId(): void
-    {
-        $templateId = 'VOD_TEMPLATE_GROUP_001';
-        $result = $this->config->setTemplateGroupId($templateId);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertEquals($templateId, $this->config->getTemplateGroupId());
-    }
-
-    public function test_setTemplateGroupId_withNull(): void
-    {
-        $this->config->setTemplateGroupId('test');
-        $result = $this->config->setTemplateGroupId(null);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertNull($this->config->getTemplateGroupId());
-    }
-
-    public function test_setStorageLocation_withValidLocation(): void
-    {
-        $location = 'outin-test-bucket.oss-cn-shanghai.aliyuncs.com';
-        $result = $this->config->setStorageLocation($location);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertEquals($location, $this->config->getStorageLocation());
-    }
-
-    public function test_setStorageLocation_withNull(): void
-    {
-        $this->config->setStorageLocation('test');
-        $result = $this->config->setStorageLocation(null);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertNull($this->config->getStorageLocation());
-    }
-
-    public function test_setCallbackUrl_withValidUrl(): void
-    {
-        $url = 'https://example.com/vod/callback';
-        $result = $this->config->setCallbackUrl($url);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertEquals($url, $this->config->getCallbackUrl());
-    }
-
-    public function test_setCallbackUrl_withNull(): void
-    {
-        $this->config->setCallbackUrl('test');
-        $result = $this->config->setCallbackUrl(null);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertNull($this->config->getCallbackUrl());
-    }
-
-    public function test_setIsDefault_withTrue(): void
-    {
-        $result = $this->config->setIsDefault(true);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertTrue($this->config->isDefault());
-    }
-
-    public function test_setIsDefault_withFalse(): void
-    {
-        $this->config->setIsDefault(true);
-        $result = $this->config->setIsDefault(false);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertFalse($this->config->isDefault());
-    }
-
-    public function test_setValid_withTrue(): void
-    {
-        $result = $this->config->setValid(true);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertTrue($this->config->isValid());
-    }
-
-    public function test_setValid_withFalse(): void
-    {
-        $result = $this->config->setValid(false);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertFalse($this->config->isValid());
-    }
-
-    public function test_updatedTime_isUpdatedOnPropertyChange(): void
-    {
-        $originalTime = $this->config->getUpdateTime();
-        
         // 等待一毫秒确保时间不同
         usleep(1000);
-        
-        $this->config->setName('新名称');
-        $newTime = $this->config->getUpdateTime();
-        
+
+        $config->setName('新名称');
+        $newTime = $config->getUpdateTime();
+
         $this->assertGreaterThan($originalTime, $newTime);
     }
 
-    public function test_toString_returnsName(): void
+    public function testToStringReturnsName(): void
     {
+        $config = new AliyunVodConfig();
         $name = '测试配置名称';
-        $this->config->setName($name);
-        
-        $this->assertEquals($name, (string) $this->config);
+        $config->setName($name);
+
+        $this->assertEquals($name, (string) $config);
     }
 
-    public function test_toString_withEmptyName(): void
+    public function testToStringWithEmptyName(): void
     {
-        $this->config->setName('');
-        
-        $this->assertEquals('', (string) $this->config);
+        $config = new AliyunVodConfig();
+        $config->setName('');
+
+        $this->assertEquals('', (string) $config);
     }
 
-    public function test_allPropertiesChaining(): void
+    public function testAllPropertiesChaining(): void
     {
-        $result = $this->config
-            ->setName('链式测试')
-            ->setAccessKeyId('LTAI5tChainTest')
-            ->setAccessKeySecret('ChainTestSecret')
-            ->setRegionId('cn-shenzhen')
-            ->setTemplateGroupId('CHAIN_TEMPLATE')
-            ->setStorageLocation('chain-bucket.oss-cn-shenzhen.aliyuncs.com')
-            ->setCallbackUrl('https://chain.example.com/callback')
-            ->setIsDefault(true)
-            ->setValid(false);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertEquals('链式测试', $this->config->getName());
-        $this->assertEquals('LTAI5tChainTest', $this->config->getAccessKeyId());
-        $this->assertEquals('ChainTestSecret', $this->config->getAccessKeySecret());
-        $this->assertEquals('cn-shenzhen', $this->config->getRegionId());
-        $this->assertEquals('CHAIN_TEMPLATE', $this->config->getTemplateGroupId());
-        $this->assertEquals('chain-bucket.oss-cn-shenzhen.aliyuncs.com', $this->config->getStorageLocation());
-        $this->assertEquals('https://chain.example.com/callback', $this->config->getCallbackUrl());
-        $this->assertTrue($this->config->isDefault());
-        $this->assertFalse($this->config->isValid());
+        $config = new AliyunVodConfig();
+        $config->setName('链式测试');
+        $config->setAccessKeyId('LTAI5tChainTest');
+        $config->setAccessKeySecret('ChainTestSecret');
+        $config->setRegionId('cn-shenzhen');
+        $config->setTemplateGroupId('CHAIN_TEMPLATE');
+        $config->setStorageLocation('chain-bucket.oss-cn-shenzhen.aliyuncs.com');
+        $config->setCallbackUrl('https://chain.example.com/callback');
+        $config->setIsDefault(true);
+        $config->setValid(false);
+        $this->assertEquals('链式测试', $config->getName());
+        $this->assertEquals('LTAI5tChainTest', $config->getAccessKeyId());
+        $this->assertEquals('ChainTestSecret', $config->getAccessKeySecret());
+        $this->assertEquals('cn-shenzhen', $config->getRegionId());
+        $this->assertEquals('CHAIN_TEMPLATE', $config->getTemplateGroupId());
+        $this->assertEquals('chain-bucket.oss-cn-shenzhen.aliyuncs.com', $config->getStorageLocation());
+        $this->assertEquals('https://chain.example.com/callback', $config->getCallbackUrl());
+        $this->assertTrue($config->isDefault());
+        $this->assertFalse($config->isValid());
     }
 
-    public function test_createdTime_isImmutable(): void
+    public function testCreatedTimeIsImmutable(): void
     {
-        $originalTime = $this->config->getCreateTime();
-        
+        $config = new AliyunVodConfig();
+        $originalTime = $config->getCreateTime();
+
         // 尝试修改其他属性
-        $this->config->setName('测试');
-        
+        $config->setName('测试');
+
         // 创建时间应该保持不变
-        $this->assertEquals($originalTime, $this->config->getCreateTime());
+        $this->assertEquals($originalTime, $config->getCreateTime());
     }
 
-    public function test_multipleUpdates_updateTimestamp(): void
+    public function testMultipleUpdatesUpdateTimestamp(): void
     {
+        $config = new AliyunVodConfig();
         $times = [];
-        $times[] = $this->config->getUpdateTime();
-        
+        $times[] = $config->getUpdateTime();
+
         usleep(1000);
-        $this->config->setName('第一次更新');
-        $times[] = $this->config->getUpdateTime();
-        
+        $config->setName('第一次更新');
+        $times[] = $config->getUpdateTime();
+
         usleep(1000);
-        $this->config->setRegionId('cn-beijing');
-        $times[] = $this->config->getUpdateTime();
-        
+        $config->setRegionId('cn-beijing');
+        $times[] = $config->getUpdateTime();
+
         usleep(1000);
-        $this->config->setValid(false);
-        $times[] = $this->config->getUpdateTime();
-        
+        $config->setValid(false);
+        $times[] = $config->getUpdateTime();
+
         // 每次更新时间都应该递增
         $this->assertGreaterThan($times[0], $times[1]);
         $this->assertGreaterThan($times[1], $times[2]);

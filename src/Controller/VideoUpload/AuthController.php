@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Controller\VideoUpload;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -12,11 +14,11 @@ use Tourze\AliyunVodBundle\Service\VideoUploadService;
 /**
  * 获取上传凭证控制器
  */
-class AuthController extends AbstractController
+final class AuthController extends AbstractController
 {
     public function __construct(
         private readonly VideoUploadService $uploadService,
-        private readonly AliyunVodConfigService $configService
+        private readonly AliyunVodConfigService $configService,
     ) {
     }
 
@@ -30,7 +32,7 @@ class AuthController extends AbstractController
             $tags = $request->request->get('tags');
             $configName = $request->request->get('config');
 
-            if ($title === null || $fileName === null) {
+            if (!is_string($title) || !is_string($fileName)) {
                 return new JsonResponse([
                     'success' => false,
                     'message' => '标题和文件名不能为空',
@@ -38,15 +40,15 @@ class AuthController extends AbstractController
             }
 
             $config = null;
-            if ($configName !== null) {
+            if (is_string($configName)) {
                 $config = $this->configService->getConfigByName($configName);
             }
 
             $result = $this->uploadService->createUploadAuth(
                 $title,
                 $fileName,
-                $description,
-                $tags,
+                is_string($description) ? $description : null,
+                is_string($tags) ? $tags : null,
                 $config
             );
 
@@ -54,7 +56,6 @@ class AuthController extends AbstractController
                 'success' => true,
                 'data' => $result,
             ]);
-
         } catch (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,

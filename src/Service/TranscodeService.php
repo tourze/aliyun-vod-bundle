@@ -1,40 +1,46 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Service;
 
 use AlibabaCloud\SDK\Vod\V20170321\Models\GetTranscodeTaskRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\SubmitTranscodeJobsRequest;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
 use Tourze\AliyunVodBundle\Exception\AliyunVodException;
 
 /**
  * 视频转码服务
  */
-class TranscodeService
+#[Autoconfigure(public: true)]
+readonly class TranscodeService
 {
     public function __construct(
-        private readonly VodClientFactory $clientFactory,
-        private readonly AliyunVodConfigService $configService
+        private VodClientFactory $clientFactory,
+        private AliyunVodConfigService $configService,
     ) {
     }
 
     /**
      * 提交转码任务
+     *
+     * @return array<string, mixed>
      */
     public function submitTranscodeJobs(
         string $videoId,
         ?string $templateGroupId = null,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
 
         // 如果没有指定模板组ID，使用配置中的默认模板组ID
-        $templateGroupId = $templateGroupId ?? $config->getTemplateGroupId();
+        $templateGroupId ??= $config->getTemplateGroupId();
 
         $request = new SubmitTranscodeJobsRequest([
             'videoId' => $videoId,
@@ -51,13 +57,15 @@ class TranscodeService
 
     /**
      * 获取转码任务详情
+     *
+     * @return array<string, mixed>
      */
     public function getTranscodeTask(
         string $transcodeTaskId,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -82,6 +90,10 @@ class TranscodeService
 
     /**
      * 格式化转码任务信息列表
+     *
+     * @param array<mixed> $jobInfoList
+     *
+     * @return array<int, array<string, mixed>>
      */
     private function formatTranscodeJobInfoList(array $jobInfoList): array
     {
@@ -100,15 +112,18 @@ class TranscodeService
                 'outputFile' => $this->formatOutputFile($jobInfo->outputFile ?? null),
             ];
         }
+
         return $formattedList;
     }
 
     /**
      * 格式化输出文件信息
+     *
+     * @return array<string, mixed>|null
      */
-    private function formatOutputFile($outputFile): ?array
+    private function formatOutputFile(mixed $outputFile): ?array
     {
-        if (!$outputFile) {
+        if (null === $outputFile || false === $outputFile) {
             return null;
         }
 
@@ -129,28 +144,31 @@ class TranscodeService
      */
     public function checkTranscodeStatus(
         string $transcodeTaskId,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): string {
         $taskInfo = $this->getTranscodeTask($transcodeTaskId, $config);
+
         return $taskInfo['taskStatus'];
     }
 
     /**
      * 获取转码进度
+     *
+     * @return array<string, mixed>
      */
     public function getTranscodeProgress(
         string $transcodeTaskId,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
         $taskInfo = $this->getTranscodeTask($transcodeTaskId, $config);
-        
+
         $totalJobs = count($taskInfo['transcodeJobInfoList']);
         $completedJobs = 0;
         $totalProgress = 0;
 
         foreach ($taskInfo['transcodeJobInfoList'] as $job) {
-            if ($job['transcodeJobStatus'] === 'TranscodeSuccess') {
-                $completedJobs++;
+            if ('TranscodeSuccess' === $job['transcodeJobStatus']) {
+                ++$completedJobs;
                 $totalProgress += 100;
             } else {
                 $totalProgress += $job['transcodeProgress'] ?? 0;

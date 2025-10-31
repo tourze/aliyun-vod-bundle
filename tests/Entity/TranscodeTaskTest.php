@@ -1,367 +1,249 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Tests\Entity;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
 use Tourze\AliyunVodBundle\Entity\TranscodeTask;
 use Tourze\AliyunVodBundle\Entity\Video;
+use Tourze\PHPUnitDoctrineEntity\AbstractEntityTestCase;
 
 /**
  * 转码任务实体测试
+ *
+ * @internal
  */
-class TranscodeTaskTest extends TestCase
+#[CoversClass(TranscodeTask::class)]
+final class TranscodeTaskTest extends AbstractEntityTestCase
 {
-    private TranscodeTask $task;
-    private Video $video;
-    private AliyunVodConfig $config;
-
-    protected function setUp(): void
+    protected function createEntity(): object
     {
-        $this->task = new TranscodeTask();
-        $this->config = new AliyunVodConfig();
-        $this->config->setName('测试配置');
-        $this->video = new Video();
-        $this->video->setConfig($this->config)
-            ->setVideoId('test_video_001')
-            ->setTitle('测试视频');
+        $config = new AliyunVodConfig();
+        $config->setName('测试配置');
+
+        $video = new Video();
+        $video->setConfig($config);
+        $video->setVideoId('test_video_001');
+        $video->setTitle('测试视频');
+
+        $task = new TranscodeTask();
+        $task->setVideo($video);
+        $task->setTaskId('transcode_task_001');
+
+        return $task;
     }
 
-    public function test_construct_setsDefaultValues(): void
+    /**
+     * @return iterable<array{string, mixed}>
+     */
+    public static function propertiesProvider(): iterable
+    {
+        $config = new AliyunVodConfig();
+        $config->setName('测试配置');
+
+        $video = new Video();
+        $video->setConfig($config);
+        $video->setVideoId('test_video_001');
+        $video->setTitle('测试视频');
+
+        yield 'video' => ['video', $video];
+        yield 'taskId' => ['taskId', 'transcode_task_001'];
+        yield 'templateId' => ['templateId', 'VOD_TEMPLATE_HD_001'];
+        yield 'status' => ['status', 'TranscodeSuccess'];
+        yield 'progress' => ['progress', 50];
+        yield 'errorCode' => ['errorCode', 'InvalidVideo.Format'];
+        yield 'errorMessage' => ['errorMessage', '视频格式不支持，请检查输入文件格式'];
+        yield 'completedTime' => ['completedTime', new \DateTimeImmutable()];
+    }
+
+    public function testConstructSetsDefaultValues(): void
     {
         $task = new TranscodeTask();
-        
+
         $this->assertEquals('Processing', $task->getStatus());
         $this->assertEquals(0, $task->getProgress());
         $this->assertNull($task->getCompletedTime());
         $this->assertFalse($task->isCompleted());
+        $this->assertNotNull($task->getCreatedTime());
         $this->assertInstanceOf(\DateTimeImmutable::class, $task->getCreatedTime());
+        $this->assertNotNull($task->getUpdatedTime());
         $this->assertInstanceOf(\DateTimeImmutable::class, $task->getUpdatedTime());
     }
 
-    public function test_setVideo_withValidVideo(): void
+    public function testMarkAsCompletedSetsCompletedTime(): void
     {
-        $result = $this->task->setVideo($this->video);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertSame($this->video, $this->task->getVideo());
+        $task = new TranscodeTask();
+        $this->assertNull($task->getCompletedTime());
+        $this->assertFalse($task->isCompleted());
+
+        $result = $task->markAsCompleted();
+
+        $this->assertSame($task, $result);
+        $this->assertInstanceOf(\DateTimeImmutable::class, $task->getCompletedTime());
+        $this->assertTrue($task->isCompleted());
     }
 
-    public function test_setTaskId_withValidId(): void
+    public function testMarkAsCompletedUpdatesTimestamp(): void
     {
-        $taskId = 'transcode_task_001';
-        $result = $this->task->setTaskId($taskId);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertEquals($taskId, $this->task->getTaskId());
-    }
+        $task = new TranscodeTask();
+        $originalUpdatedTime = $task->getUpdatedTime();
 
-    public function test_setTemplateId_withValidId(): void
-    {
-        $templateId = 'VOD_TEMPLATE_HD_001';
-        $result = $this->task->setTemplateId($templateId);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertEquals($templateId, $this->task->getTemplateId());
-    }
-
-    public function test_setTemplateId_withNull(): void
-    {
-        $this->task->setTemplateId('test');
-        $result = $this->task->setTemplateId(null);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertNull($this->task->getTemplateId());
-    }
-
-    public function test_setStatus_withValidStatus(): void
-    {
-        $status = 'TranscodeSuccess';
-        $result = $this->task->setStatus($status);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertEquals($status, $this->task->getStatus());
-    }
-
-    public function test_setStatus_withDifferentStatuses(): void
-    {
-        $statuses = ['Processing', 'TranscodeSuccess', 'TranscodeFail', 'TranscodeCancel'];
-        
-        foreach ($statuses as $status) {
-            $this->task->setStatus($status);
-            $this->assertEquals($status, $this->task->getStatus());
-        }
-    }
-
-    public function test_setProgress_withValidProgress(): void
-    {
-        $progress = 50;
-        $result = $this->task->setProgress($progress);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertEquals($progress, $this->task->getProgress());
-    }
-
-    public function test_setProgress_withZero(): void
-    {
-        $this->task->setProgress(50);
-        $result = $this->task->setProgress(0);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertEquals(0, $this->task->getProgress());
-    }
-
-    public function test_setProgress_withHundred(): void
-    {
-        $result = $this->task->setProgress(100);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertEquals(100, $this->task->getProgress());
-    }
-
-    public function test_setErrorCode_withValidCode(): void
-    {
-        $errorCode = 'InvalidVideo.Format';
-        $result = $this->task->setErrorCode($errorCode);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertEquals($errorCode, $this->task->getErrorCode());
-    }
-
-    public function test_setErrorCode_withNull(): void
-    {
-        $this->task->setErrorCode('test');
-        $result = $this->task->setErrorCode(null);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertNull($this->task->getErrorCode());
-    }
-
-    public function test_setErrorMessage_withValidMessage(): void
-    {
-        $errorMessage = '视频格式不支持，请检查输入文件格式';
-        $result = $this->task->setErrorMessage($errorMessage);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertEquals($errorMessage, $this->task->getErrorMessage());
-    }
-
-    public function test_setErrorMessage_withNull(): void
-    {
-        $this->task->setErrorMessage('test');
-        $result = $this->task->setErrorMessage(null);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertNull($this->task->getErrorMessage());
-    }
-
-    public function test_setCompletedTime_withValidTime(): void
-    {
-        $completedTime = new \DateTimeImmutable();
-        $result = $this->task->setCompletedTime($completedTime);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertEquals($completedTime, $this->task->getCompletedTime());
-    }
-
-    public function test_setCompletedTime_withNull(): void
-    {
-        $this->task->setCompletedTime(new \DateTimeImmutable());
-        $result = $this->task->setCompletedTime(null);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertNull($this->task->getCompletedTime());
-    }
-
-    public function test_markAsCompleted_setsCompletedTime(): void
-    {
-        $this->assertNull($this->task->getCompletedTime());
-        $this->assertFalse($this->task->isCompleted());
-        
-        $result = $this->task->markAsCompleted();
-        
-        $this->assertSame($this->task, $result);
-        $this->assertInstanceOf(\DateTimeImmutable::class, $this->task->getCompletedTime());
-        $this->assertTrue($this->task->isCompleted());
-    }
-
-    public function test_markAsCompleted_updatesTimestamp(): void
-    {
-        $originalUpdatedTime = $this->task->getUpdatedTime();
-        
         usleep(1000);
-        
-        $this->task->markAsCompleted();
-        $newUpdatedTime = $this->task->getUpdatedTime();
-        
+
+        $task->markAsCompleted();
+        $newUpdatedTime = $task->getUpdatedTime();
+
         $this->assertGreaterThan($originalUpdatedTime, $newUpdatedTime);
     }
 
-    public function test_isCompleted_withCompletedTime(): void
+    public function testIsCompletedWithCompletedTime(): void
     {
-        $this->task->setCompletedTime(new \DateTimeImmutable());
-        
-        $this->assertTrue($this->task->isCompleted());
+        $task = new TranscodeTask();
+        $task->setCompletedTime(new \DateTimeImmutable());
+
+        $this->assertTrue($task->isCompleted());
     }
 
-    public function test_isCompleted_withoutCompletedTime(): void
+    public function testIsCompletedWithoutCompletedTime(): void
     {
-        $this->task->setCompletedTime(null);
-        
-        $this->assertFalse($this->task->isCompleted());
+        $task = new TranscodeTask();
+        $task->setCompletedTime(null);
+
+        $this->assertFalse($task->isCompleted());
     }
 
-    public function test_updatedTime_isUpdatedOnPropertyChange(): void
+    public function testToStringReturnsFormattedString(): void
     {
-        $originalTime = $this->task->getUpdatedTime();
-        
-        usleep(1000);
-        
-        $this->task->setProgress(75);
-        $newTime = $this->task->getUpdatedTime();
-        
-        $this->assertGreaterThan($originalTime, $newTime);
-    }
+        $task = new TranscodeTask();
+        $task->setTaskId('test_task_001');
+        $task->setStatus('Processing');
 
-    public function test_toString_returnsFormattedString(): void
-    {
-        $this->task->setTaskId('test_task_001')
-            ->setStatus('Processing');
-        
         $expected = '转码任务 test_task_001 (Processing)';
-        $this->assertEquals($expected, (string) $this->task);
+        $this->assertEquals($expected, (string) $task);
     }
 
-    public function test_toString_withDifferentStatus(): void
+    public function testToStringWithDifferentStatus(): void
     {
-        $this->task->setTaskId('test_task_002')
-            ->setStatus('TranscodeSuccess');
-        
+        $task = new TranscodeTask();
+        $task->setTaskId('test_task_002');
+        $task->setStatus('TranscodeSuccess');
+
         $expected = '转码任务 test_task_002 (TranscodeSuccess)';
-        $this->assertEquals($expected, (string) $this->task);
+        $this->assertEquals($expected, (string) $task);
     }
 
-    public function test_allPropertiesChaining(): void
+    public function testMultipleUpdatesUpdateTimestamp(): void
     {
-        $completedTime = new \DateTimeImmutable();
-        
-        $result = $this->task
-            ->setVideo($this->video)
-            ->setTaskId('chain_task_001')
-            ->setTemplateId('CHAIN_TEMPLATE')
-            ->setStatus('TranscodeSuccess')
-            ->setProgress(100)
-            ->setErrorCode(null)
-            ->setErrorMessage(null)
-            ->setCompletedTime($completedTime);
-        
-        $this->assertSame($this->task, $result);
-        $this->assertSame($this->video, $this->task->getVideo());
-        $this->assertEquals('chain_task_001', $this->task->getTaskId());
-        $this->assertEquals('CHAIN_TEMPLATE', $this->task->getTemplateId());
-        $this->assertEquals('TranscodeSuccess', $this->task->getStatus());
-        $this->assertEquals(100, $this->task->getProgress());
-        $this->assertNull($this->task->getErrorCode());
-        $this->assertNull($this->task->getErrorMessage());
-        $this->assertEquals($completedTime, $this->task->getCompletedTime());
-    }
-
-    public function test_createdTime_isImmutable(): void
-    {
-        $originalTime = $this->task->getCreatedTime();
-        
-        $this->task->setProgress(50);
-        
-        $this->assertEquals($originalTime, $this->task->getCreatedTime());
-    }
-
-    public function test_multipleUpdates_updateTimestamp(): void
-    {
+        $task = new TranscodeTask();
         $times = [];
-        $times[] = $this->task->getUpdatedTime();
-        
+        $times[] = $task->getUpdatedTime();
+
         usleep(1000);
-        $this->task->setProgress(25);
-        $times[] = $this->task->getUpdatedTime();
-        
+        $task->setProgress(25);
+        $times[] = $task->getUpdatedTime();
+
         usleep(1000);
-        $this->task->setProgress(50);
-        $times[] = $this->task->getUpdatedTime();
-        
+        $task->setProgress(50);
+        $times[] = $task->getUpdatedTime();
+
         usleep(1000);
-        $this->task->setStatus('TranscodeSuccess');
-        $times[] = $this->task->getUpdatedTime();
-        
+        $task->setStatus('TranscodeSuccess');
+        $times[] = $task->getUpdatedTime();
+
         $this->assertGreaterThan($times[0], $times[1]);
         $this->assertGreaterThan($times[1], $times[2]);
         $this->assertGreaterThan($times[2], $times[3]);
     }
 
-    public function test_progressBoundaries(): void
+    public function testProgressBoundaries(): void
     {
+        $task = new TranscodeTask();
+
         // 测试边界值
-        $this->task->setProgress(0);
-        $this->assertEquals(0, $this->task->getProgress());
-        
-        $this->task->setProgress(100);
-        $this->assertEquals(100, $this->task->getProgress());
-        
+        $task->setProgress(0);
+        $this->assertEquals(0, $task->getProgress());
+
+        $task->setProgress(100);
+        $this->assertEquals(100, $task->getProgress());
+
         // 测试超出边界的值（虽然在实际使用中应该验证）
-        $this->task->setProgress(-10);
-        $this->assertEquals(-10, $this->task->getProgress());
-        
-        $this->task->setProgress(150);
-        $this->assertEquals(150, $this->task->getProgress());
+        $task->setProgress(-10);
+        $this->assertEquals(-10, $task->getProgress());
+
+        $task->setProgress(150);
+        $this->assertEquals(150, $task->getProgress());
     }
 
-    public function test_errorHandling_scenario(): void
+    public function testErrorHandlingScenario(): void
     {
+        $config = new AliyunVodConfig();
+        $config->setName('测试配置');
+
+        $video = new Video();
+        $video->setConfig($config);
+        $video->setVideoId('test_video_001');
+        $video->setTitle('测试视频');
+
+        $task = new TranscodeTask();
         // 模拟转码失败场景
-        $this->task->setVideo($this->video)
-            ->setTaskId('failed_task_001')
-            ->setStatus('TranscodeFail')
-            ->setProgress(0)
-            ->setErrorCode('InvalidVideo.Format')
-            ->setErrorMessage('视频格式不支持')
-            ->markAsCompleted();
-        
-        $this->assertEquals('TranscodeFail', $this->task->getStatus());
-        $this->assertEquals(0, $this->task->getProgress());
-        $this->assertEquals('InvalidVideo.Format', $this->task->getErrorCode());
-        $this->assertEquals('视频格式不支持', $this->task->getErrorMessage());
-        $this->assertTrue($this->task->isCompleted());
+        $task->setVideo($video);
+        $task->setTaskId('failed_task_001');
+        $task->setStatus('TranscodeFail');
+        $task->setProgress(0);
+        $task->setErrorCode('InvalidVideo.Format');
+        $task->setErrorMessage('视频格式不支持');
+        $task->markAsCompleted();
+
+        $this->assertEquals('TranscodeFail', $task->getStatus());
+        $this->assertEquals(0, $task->getProgress());
+        $this->assertEquals('InvalidVideo.Format', $task->getErrorCode());
+        $this->assertEquals('视频格式不支持', $task->getErrorMessage());
+        $this->assertTrue($task->isCompleted());
     }
 
-    public function test_successfulTranscode_scenario(): void
+    public function testSuccessfulTranscodeScenario(): void
     {
+        $config = new AliyunVodConfig();
+        $config->setName('测试配置');
+
+        $video = new Video();
+        $video->setConfig($config);
+        $video->setVideoId('test_video_001');
+        $video->setTitle('测试视频');
+
+        $task = new TranscodeTask();
         // 模拟转码成功场景
-        $this->task->setVideo($this->video)
-            ->setTaskId('success_task_001')
-            ->setTemplateId('HD_TEMPLATE')
-            ->setStatus('TranscodeSuccess')
-            ->setProgress(100)
-            ->markAsCompleted();
-        
-        $this->assertEquals('TranscodeSuccess', $this->task->getStatus());
-        $this->assertEquals(100, $this->task->getProgress());
-        $this->assertNull($this->task->getErrorCode());
-        $this->assertNull($this->task->getErrorMessage());
-        $this->assertTrue($this->task->isCompleted());
+        $task->setVideo($video);
+        $task->setTaskId('success_task_001');
+        $task->setTemplateId('HD_TEMPLATE');
+        $task->setStatus('TranscodeSuccess');
+        $task->setProgress(100);
+        $task->markAsCompleted();
+
+        $this->assertEquals('TranscodeSuccess', $task->getStatus());
+        $this->assertEquals(100, $task->getProgress());
+        $this->assertNull($task->getErrorCode());
+        $this->assertNull($task->getErrorMessage());
+        $this->assertTrue($task->isCompleted());
     }
 
-    public function test_longErrorMessage_handling(): void
+    public function testLongErrorMessageHandling(): void
     {
+        $task = new TranscodeTask();
         $longMessage = str_repeat('这是一个很长的错误消息。', 100);
-        $this->task->setErrorMessage($longMessage);
-        
-        $this->assertEquals($longMessage, $this->task->getErrorMessage());
+        $task->setErrorMessage($longMessage);
+
+        $this->assertEquals($longMessage, $task->getErrorMessage());
     }
 
-    public function test_specialCharacters_inTaskId(): void
+    public function testSpecialCharactersInTaskId(): void
     {
+        $task = new TranscodeTask();
         $taskId = 'task_001_特殊字符_!@#$%';
-        $this->task->setTaskId($taskId);
-        
-        $this->assertEquals($taskId, $this->task->getTaskId());
+        $task->setTaskId($taskId);
+
+        $this->assertEquals($taskId, $task->getTaskId());
     }
-} 
+}

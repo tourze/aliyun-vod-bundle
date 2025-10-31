@@ -1,20 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Tourze\AliyunVodBundle\Entity\PlayRecord;
 use Tourze\AliyunVodBundle\Entity\Video;
+use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
 
 /**
  * 播放记录仓储
  *
- * @method PlayRecord|null find($id, $lockMode = null, $lockVersion = null)
- * @method PlayRecord|null findOneBy(array $criteria, array $orderBy = null)
- * @method PlayRecord[] findAll()
- * @method PlayRecord[] findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends ServiceEntityRepository<PlayRecord>
  */
+#[AsRepository(entityClass: PlayRecord::class)]
 class PlayRecordRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -24,6 +25,8 @@ class PlayRecordRepository extends ServiceEntityRepository
 
     /**
      * 根据视频查找播放记录
+     *
+     * @return array<int, PlayRecord>
      */
     public function findByVideo(Video $video): array
     {
@@ -43,6 +46,8 @@ class PlayRecordRepository extends ServiceEntityRepository
 
     /**
      * 根据IP地址查找播放记录
+     *
+     * @return array<int, PlayRecord>
      */
     public function findByIpAddress(string $ipAddress): array
     {
@@ -54,6 +59,8 @@ class PlayRecordRepository extends ServiceEntityRepository
 
     /**
      * 获取热门视频（按播放次数排序）
+     *
+     * @return array<int, array{id: int, title: string, playCount: int}>
      */
     public function getPopularVideos(int $limit = 10): array
     {
@@ -66,11 +73,14 @@ class PlayRecordRepository extends ServiceEntityRepository
             ->orderBy('playCount', 'DESC')
             ->setMaxResults($limit)
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 
     /**
      * 获取指定时间范围内的播放记录
+     *
+     * @return array<int, PlayRecord>
      */
     public function findByDateRange(\DateTime $startDate, \DateTime $endDate): array
     {
@@ -81,6 +91,25 @@ class PlayRecordRepository extends ServiceEntityRepository
             ->setParameter('endDate', $endDate)
             ->orderBy('pr.playTime', 'DESC')
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
+    }
+
+    public function save(PlayRecord $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(PlayRecord $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 }

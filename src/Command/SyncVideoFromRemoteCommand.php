@@ -1,8 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Monolog\Attribute\WithMonologChannel;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -18,10 +21,10 @@ use Tourze\AliyunVodBundle\Repository\VideoRepository;
 /**
  * 从阿里云VOD同步视频数据到本地数据库
  */
-#[AsCommand(
-    name: self::NAME,
-    description: '从阿里云VOD同步视频数据到本地数据库'
-)]
+#[AsCommand(name: self::NAME, description: '从阿里云VOD同步视频数据到本地数据库', help: <<<'TXT'
+    此命令从阿里云VOD服务同步视频数据到本地数据库，支持增量同步和全量同步。
+    TXT)]
+#[WithMonologChannel(channel: 'aliyun_vod')]
 class SyncVideoFromRemoteCommand extends Command
 {
     public const NAME = 'aliyun-vod:sync:from-remote';
@@ -30,7 +33,7 @@ class SyncVideoFromRemoteCommand extends Command
         private readonly EntityManagerInterface $entityManager,
         private readonly AliyunVodConfigRepository $configRepository,
         private readonly VideoRepository $videoRepository,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
     ) {
         parent::__construct();
     }
@@ -42,7 +45,7 @@ class SyncVideoFromRemoteCommand extends Command
             ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, '限制同步数量', 100)
             ->addOption('force', 'f', InputOption::VALUE_NONE, '强制更新已存在的视频')
             ->addOption('dry-run', null, InputOption::VALUE_NONE, '试运行模式，不实际写入数据库')
-            ->setHelp('此命令从阿里云VOD服务同步视频数据到本地数据库，支持增量同步和全量同步。');
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -58,8 +61,9 @@ class SyncVideoFromRemoteCommand extends Command
         try {
             // 获取配置
             $configs = $this->getConfigs($configName);
-            if (empty($configs)) {
+            if ([] === $configs) {
                 $io->error('未找到可用的阿里云VOD配置');
+
                 return Command::FAILURE;
             }
 
@@ -82,13 +86,13 @@ class SyncVideoFromRemoteCommand extends Command
                         'error' => $e->getMessage(),
                         'exception' => $e,
                     ]);
-                    $totalErrors++;
+                    ++$totalErrors;
                 }
             }
 
             // 显示总结
             $io->success([
-                "同步完成！",
+                '同步完成！',
                 "新增视频: {$totalSynced}",
                 "更新视频: {$totalUpdated}",
                 "错误数量: {$totalErrors}",
@@ -101,25 +105,28 @@ class SyncVideoFromRemoteCommand extends Command
             ]);
 
             return $totalErrors > 0 ? Command::FAILURE : Command::SUCCESS;
-
         } catch (\Throwable $e) {
             $io->error("同步过程中发生错误: {$e->getMessage()}");
             $this->logger->error('视频同步异常', [
                 'error' => $e->getMessage(),
                 'exception' => $e,
             ]);
+
             return Command::FAILURE;
         }
     }
 
     /**
      * 获取要同步的配置列表
+     *
+     * @return array<int, AliyunVodConfig>
      */
     private function getConfigs(?string $configName): array
     {
-        if ($configName !== null) {
+        if (null !== $configName) {
             $config = $this->configRepository->findOneBy(['name' => $configName, 'valid' => true]);
-            return $config !== null ? [$config] : [];
+
+            return null !== $config ? [$config] : [];
         }
 
         return $this->configRepository->findActiveConfigs();
@@ -127,13 +134,15 @@ class SyncVideoFromRemoteCommand extends Command
 
     /**
      * 从指定配置同步视频
+     *
+     * @return array{synced: int, updated: int, errors: int}
      */
     private function syncVideosFromConfig(
         AliyunVodConfig $config,
         int $limit,
         bool $force,
         bool $dryRun,
-        SymfonyStyle $io
+        SymfonyStyle $io,
     ): array {
         $synced = 0;
         $updated = 0;
@@ -149,16 +158,16 @@ class SyncVideoFromRemoteCommand extends Command
         foreach ($remoteVideos as $remoteVideoData) {
             try {
                 $result = $this->syncSingleVideo($config, $remoteVideoData, $force, $dryRun);
-                
-                if ($result === 'synced') {
-                    $synced++;
-                } elseif ($result === 'updated') {
-                    $updated++;
+
+                if ('synced' === $result) {
+                    ++$synced;
+                } elseif ('updated' === $result) {
+                    ++$updated;
                 }
 
                 $progressBar->advance();
             } catch (\Throwable $e) {
-                $errors++;
+                ++$errors;
                 $this->logger->error('单个视频同步失败', [
                     'videoId' => $remoteVideoData['videoId'] ?? 'unknown',
                     'error' => $e->getMessage(),
@@ -180,51 +189,56 @@ class SyncVideoFromRemoteCommand extends Command
 
     /**
      * 同步单个视频
+     *
+     * @param array<string, mixed> $remoteVideoData
      */
     private function syncSingleVideo(
         AliyunVodConfig $config,
         array $remoteVideoData,
         bool $force,
-        bool $dryRun
+        bool $dryRun,
     ): string {
         $videoId = $remoteVideoData['videoId'];
         $existingVideo = $this->videoRepository->findByVideoId($videoId);
 
-        if ($existingVideo !== null && !$force) {
+        if (null !== $existingVideo && !$force) {
             return 'skipped';
         }
 
         if ($dryRun) {
-            return $existingVideo !== null ? 'would_update' : 'would_sync';
+            return null !== $existingVideo ? 'would_update' : 'would_sync';
         }
 
-        if ($existingVideo !== null) {
+        if (null !== $existingVideo) {
             // 更新现有视频
             $this->updateVideoFromRemoteData($existingVideo, $remoteVideoData);
+
             return 'updated';
-        } else {
-            // 创建新视频
-            $this->createVideoFromRemoteData($config, $remoteVideoData);
-            return 'synced';
         }
+        // 创建新视频
+        $this->createVideoFromRemoteData($config, $remoteVideoData);
+
+        return 'synced';
     }
 
     /**
      * 从远程数据创建新视频
+     *
+     * @param array<string, mixed> $data
      */
     private function createVideoFromRemoteData(AliyunVodConfig $config, array $data): void
     {
         $video = new Video();
-        $video->setConfig($config)
-            ->setVideoId($data['videoId'])
-            ->setTitle($data['title'])
-            ->setDescription($data['description'] ?? null)
-            ->setDuration($data['duration'] ?? null)
-            ->setSize($data['size'] ?? null)
-            ->setStatus($data['status'])
-            ->setCoverUrl($data['coverURL'] ?? null)
-            ->setTags($data['tags'] ?? null)
-            ->setValid(true);
+        $video->setConfig($config);
+        $video->setVideoId($data['videoId']);
+        $video->setTitle($data['title']);
+        $video->setDescription($data['description'] ?? null);
+        $video->setDuration($data['duration'] ?? null);
+        $video->setSize($data['size'] ?? null);
+        $video->setStatus($data['status']);
+        $video->setCoverUrl($data['coverURL'] ?? null);
+        $video->setTags($data['tags'] ?? null);
+        $video->setValid(true);
 
         $this->entityManager->persist($video);
         $this->entityManager->flush();
@@ -232,16 +246,18 @@ class SyncVideoFromRemoteCommand extends Command
 
     /**
      * 从远程数据更新现有视频
+     *
+     * @param array<string, mixed> $data
      */
     private function updateVideoFromRemoteData(Video $video, array $data): void
     {
-        $video->setTitle($data['title'])
-            ->setDescription($data['description'] ?? null)
-            ->setDuration($data['duration'] ?? null)
-            ->setSize($data['size'] ?? null)
-            ->setStatus($data['status'])
-            ->setCoverUrl($data['coverURL'] ?? null)
-            ->setTags($data['tags'] ?? null);
+        $video->setTitle($data['title']);
+        $video->setDescription($data['description'] ?? null);
+        $video->setDuration($data['duration'] ?? null);
+        $video->setSize($data['size'] ?? null);
+        $video->setStatus($data['status']);
+        $video->setCoverUrl($data['coverURL'] ?? null);
+        $video->setTags($data['tags'] ?? null);
 
         $this->entityManager->flush();
     }
@@ -249,6 +265,8 @@ class SyncVideoFromRemoteCommand extends Command
     /**
      * 获取远程视频列表（模拟数据）
      * 实际实现中应该调用阿里云API
+     *
+     * @return array<int, array<string, mixed>>
      */
     private function getRemoteVideoList(AliyunVodConfig $config, int $limit): array
     {
@@ -276,4 +294,4 @@ class SyncVideoFromRemoteCommand extends Command
             ],
         ];
     }
-} 
+}

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Service;
 
 use AlibabaCloud\SDK\Vod\V20170321\Models\AddWatermarkRequest;
@@ -7,31 +9,35 @@ use AlibabaCloud\SDK\Vod\V20170321\Models\DeleteWatermarkRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\GetWatermarkRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\ListWatermarkRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\UpdateWatermarkRequest;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
 use Tourze\AliyunVodBundle\Exception\AliyunVodException;
 
 /**
  * 视频水印服务
  */
-class VideoWatermarkService
+#[Autoconfigure(public: true)]
+readonly class VideoWatermarkService
 {
     public function __construct(
-        private readonly VodClientFactory $clientFactory,
-        private readonly AliyunVodConfigService $configService
+        private VodClientFactory $clientFactory,
+        private AliyunVodConfigService $configService,
     ) {
     }
 
     /**
      * 添加水印
+     *
+     * @return array{requestId: string, watermarkInfo: array{watermarkId: string, name: string, type: string, isDefault: string, creationTime: string}}
      */
     public function addWatermark(
         string $name,
         string $watermarkConfig,
         string $type = 'Image',
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -59,25 +65,27 @@ class VideoWatermarkService
 
     /**
      * 更新水印
+     *
+     * @return array{requestId: string, watermarkInfo: array{watermarkId: string, name: string, type: string, isDefault: string, creationTime: string}}
      */
     public function updateWatermark(
         string $watermarkId,
         ?string $name = null,
         ?string $watermarkConfig = null,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
 
         $requestData = ['watermarkId' => $watermarkId];
-        if ($name !== null) {
+        if (null !== $name) {
             $requestData['name'] = $name;
         }
-        if ($watermarkConfig !== null) {
+        if (null !== $watermarkConfig) {
             $requestData['watermarkConfig'] = $watermarkConfig;
         }
 
@@ -101,10 +109,10 @@ class VideoWatermarkService
      */
     public function deleteWatermark(
         string $watermarkId,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): bool {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -116,16 +124,18 @@ class VideoWatermarkService
 
         $response = $client->deleteWatermark($request);
 
-        return !empty($response->body->requestId);
+        return '' !== $response->body->requestId && null !== $response->body->requestId;
     }
 
     /**
      * 获取水印列表
+     *
+     * @return array<string, mixed>
      */
     public function listWatermarks(?AliyunVodConfig $config = null): array
     {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -135,7 +145,7 @@ class VideoWatermarkService
         $response = $client->listWatermark($request);
 
         $watermarks = [];
-        /** @phpstan-ignore-next-line */
+        /* @phpstan-ignore-next-line */
         if (isset($response->body->watermarkInfos)) {
             foreach ($response->body->watermarkInfos as $watermark) {
                 $watermarks[] = [
@@ -156,13 +166,15 @@ class VideoWatermarkService
 
     /**
      * 获取水印详情
+     *
+     * @return array{requestId: string, watermarkInfo: array{watermarkId: string, name: string, type: string, watermarkConfig: string, creationTime: string}}
      */
     public function getWatermark(
         string $watermarkId,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -181,7 +193,7 @@ class VideoWatermarkService
                 'name' => $response->body->watermarkInfo->name,
                 'type' => $response->body->watermarkInfo->type,
                 'watermarkConfig' => $response->body->watermarkInfo->watermarkConfig,
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'fileUrl' => $response->body->watermarkInfo->fileUrl ?? null,
                 'isDefault' => $response->body->watermarkInfo->isDefault,
                 'creationTime' => $response->body->watermarkInfo->creationTime,
@@ -198,7 +210,7 @@ class VideoWatermarkService
         int $dx = 10,
         int $dy = 10,
         int $width = 100,
-        int $height = 100
+        int $height = 100,
     ): string {
         $config = [
             'Dx' => $dx,
@@ -212,7 +224,12 @@ class VideoWatermarkService
             ],
         ];
 
-        return json_encode($config);
+        $json = json_encode($config);
+        if (false === $json) {
+            throw new AliyunVodException('无法编码水印配置');
+        }
+
+        return $json;
     }
 
     /**
@@ -225,7 +242,7 @@ class VideoWatermarkService
         string $fontColor = 'Black',
         string $position = 'TopRight',
         int $dx = 10,
-        int $dy = 10
+        int $dy = 10,
     ): string {
         $config = [
             'Content' => $content,
@@ -241,6 +258,11 @@ class VideoWatermarkService
             ],
         ];
 
-        return json_encode($config);
+        $json = json_encode($config);
+        if (false === $json) {
+            throw new AliyunVodException('无法编码水印配置');
+        }
+
+        return $json;
     }
-} 
+}

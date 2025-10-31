@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Command;
 
+use Monolog\Attribute\WithMonologChannel;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -16,10 +19,10 @@ use Tourze\AliyunVodBundle\Service\VideoManageService;
 /**
  * 将本地视频数据同步到阿里云VOD
  */
-#[AsCommand(
-    name: self::NAME,
-    description: '将本地视频数据同步到阿里云VOD'
-)]
+#[AsCommand(name: self::NAME, description: '将本地视频数据同步到阿里云VOD', help: <<<'TXT'
+    此命令将本地数据库中的视频信息同步到阿里云VOD服务，主要用于更新视频元数据。
+    TXT)]
+#[WithMonologChannel(channel: 'aliyun_vod')]
 class SyncVideoToRemoteCommand extends Command
 {
     public const NAME = 'aliyun-vod:sync:to-remote';
@@ -27,7 +30,7 @@ class SyncVideoToRemoteCommand extends Command
     public function __construct(
         private readonly VideoRepository $videoRepository,
         private readonly VideoManageService $videoManageService,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
     ) {
         parent::__construct();
     }
@@ -39,7 +42,7 @@ class SyncVideoToRemoteCommand extends Command
             ->addOption('status', 's', InputOption::VALUE_OPTIONAL, '只同步指定状态的视频')
             ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, '限制同步数量', 50)
             ->addOption('dry-run', null, InputOption::VALUE_NONE, '试运行模式，不实际调用阿里云API')
-            ->setHelp('此命令将本地数据库中的视频信息同步到阿里云VOD服务，主要用于更新视频元数据。');
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -55,13 +58,14 @@ class SyncVideoToRemoteCommand extends Command
         try {
             // 获取要同步的视频列表
             $videos = $this->getVideosToSync($videoId, $status, $limit);
-            
-            if (empty($videos)) {
+
+            if ([] === $videos) {
                 $io->warning('没有找到需要同步的视频');
+
                 return Command::SUCCESS;
             }
 
-            $io->info("找到 " . count($videos) . " 个视频需要同步");
+            $io->info('找到 ' . count($videos) . ' 个视频需要同步');
 
             $totalSynced = 0;
             $totalErrors = 0;
@@ -72,14 +76,14 @@ class SyncVideoToRemoteCommand extends Command
             foreach ($videos as $video) {
                 try {
                     $result = $this->syncVideoToRemote($video, $dryRun);
-                    
+
                     if ($result) {
-                        $totalSynced++;
+                        ++$totalSynced;
                     }
 
                     $progressBar->advance();
                 } catch (\Throwable $e) {
-                    $totalErrors++;
+                    ++$totalErrors;
                     $this->logger->error('视频同步到远程失败', [
                         'videoId' => $video->getVideoId(),
                         'error' => $e->getMessage(),
@@ -94,7 +98,7 @@ class SyncVideoToRemoteCommand extends Command
 
             // 显示总结
             $io->success([
-                "同步完成！",
+                '同步完成！',
                 "成功同步: {$totalSynced}",
                 "错误数量: {$totalErrors}",
             ]);
@@ -105,29 +109,32 @@ class SyncVideoToRemoteCommand extends Command
             ]);
 
             return $totalErrors > 0 ? Command::FAILURE : Command::SUCCESS;
-
         } catch (\Throwable $e) {
             $io->error("同步过程中发生错误: {$e->getMessage()}");
             $this->logger->error('视频同步到远程异常', [
                 'error' => $e->getMessage(),
                 'exception' => $e,
             ]);
+
             return Command::FAILURE;
         }
     }
 
     /**
      * 获取要同步的视频列表
+     *
+     * @return array<int, Video>
      */
     private function getVideosToSync(?string $videoId, ?string $status, int $limit): array
     {
-        if ($videoId !== null) {
+        if (null !== $videoId) {
             $video = $this->videoRepository->findByVideoId($videoId);
-            return $video !== null ? [$video] : [];
+
+            return null !== $video ? [$video] : [];
         }
 
         $criteria = ['valid' => true];
-        if ($status !== null) {
+        if (null !== $status) {
             $criteria['status'] = $status;
         }
 
@@ -144,6 +151,7 @@ class SyncVideoToRemoteCommand extends Command
                 'videoId' => $video->getVideoId(),
                 'title' => $video->getTitle(),
             ]);
+
             return true;
         }
 
@@ -162,11 +170,11 @@ class SyncVideoToRemoteCommand extends Command
                     'videoId' => $video->getVideoId(),
                     'title' => $video->getTitle(),
                 ]);
+
                 return true;
             }
 
             return false;
-
         } catch (\Throwable $e) {
             $this->logger->error('视频同步到远程失败', [
                 'videoId' => $video->getVideoId(),
@@ -176,4 +184,4 @@ class SyncVideoToRemoteCommand extends Command
             throw $e;
         }
     }
-} 
+}

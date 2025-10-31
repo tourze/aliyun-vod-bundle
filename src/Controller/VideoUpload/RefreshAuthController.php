@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Controller\VideoUpload;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -12,11 +14,11 @@ use Tourze\AliyunVodBundle\Service\VideoUploadService;
 /**
  * 刷新上传凭证控制器
  */
-class RefreshAuthController extends AbstractController
+final class RefreshAuthController extends AbstractController
 {
     public function __construct(
         private readonly VideoUploadService $uploadService,
-        private readonly AliyunVodConfigService $configService
+        private readonly AliyunVodConfigService $configService,
     ) {
     }
 
@@ -27,7 +29,7 @@ class RefreshAuthController extends AbstractController
             $videoId = $request->request->get('videoId');
             $configName = $request->request->get('config');
 
-            if ($videoId === null) {
+            if (!is_string($videoId)) {
                 return new JsonResponse([
                     'success' => false,
                     'message' => '视频ID不能为空',
@@ -35,7 +37,7 @@ class RefreshAuthController extends AbstractController
             }
 
             $config = null;
-            if ($configName !== null) {
+            if (is_string($configName)) {
                 $config = $this->configService->getConfigByName($configName);
             }
 
@@ -45,7 +47,6 @@ class RefreshAuthController extends AbstractController
                 'success' => true,
                 'data' => $result,
             ]);
-
         } catch (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,

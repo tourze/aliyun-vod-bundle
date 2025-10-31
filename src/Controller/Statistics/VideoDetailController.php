@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Controller\Statistics;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,11 +13,11 @@ use Tourze\AliyunVodBundle\Service\StatisticsService;
 /**
  * 视频播放统计详情控制器
  */
-class VideoDetailController extends AbstractController
+final class VideoDetailController extends AbstractController
 {
     public function __construct(
         private readonly StatisticsService $statisticsService,
-        private readonly VideoRepository $videoRepository
+        private readonly VideoRepository $videoRepository,
     ) {
     }
 
@@ -23,7 +25,7 @@ class VideoDetailController extends AbstractController
     public function __invoke(int $id): Response
     {
         $video = $this->videoRepository->find($id);
-        if ($video === null) {
+        if (null === $video) {
             throw $this->createNotFoundException('视频不存在');
         }
 

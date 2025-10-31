@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Controller\Statistics;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,10 +13,10 @@ use Tourze\AliyunVodBundle\Service\StatisticsService;
 /**
  * 获取指定时间范围的统计数据控制器
  */
-class RangeController extends AbstractController
+final class RangeController extends AbstractController
 {
     public function __construct(
-        private readonly StatisticsService $statisticsService
+        private readonly StatisticsService $statisticsService,
     ) {
     }
 
@@ -22,8 +24,18 @@ class RangeController extends AbstractController
     public function __invoke(Request $request): JsonResponse
     {
         try {
-            $startDate = new \DateTime($request->request->get('startDate'));
-            $endDate = new \DateTime($request->request->get('endDate'));
+            $startDateParam = $request->request->get('startDate');
+            $endDateParam = $request->request->get('endDate');
+
+            if (!is_string($startDateParam) || !is_string($endDateParam)) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Invalid date parameters',
+                ], 400);
+            }
+
+            $startDate = new \DateTime($startDateParam);
+            $endDate = new \DateTime($endDateParam);
 
             $stats = $this->statisticsService->getPlayStatsByDateRange($startDate, $endDate);
 
@@ -31,7 +43,6 @@ class RangeController extends AbstractController
                 'success' => true,
                 'data' => $stats,
             ]);
-
         } catch (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,

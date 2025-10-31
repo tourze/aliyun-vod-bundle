@@ -1,41 +1,47 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Service;
 
 use AlibabaCloud\SDK\Vod\V20170321\Models\GetAIMediaAuditJobRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\GetMediaAuditResultRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\SubmitAIMediaAuditJobRequest;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
 use Tourze\AliyunVodBundle\Exception\AliyunVodException;
 
 /**
  * 视频审核服务
  */
-class VideoAuditService
+#[Autoconfigure(public: true)]
+readonly class VideoAuditService
 {
     public function __construct(
-        private readonly VodClientFactory $clientFactory,
-        private readonly AliyunVodConfigService $configService
+        private VodClientFactory $clientFactory,
+        private AliyunVodConfigService $configService,
     ) {
     }
 
     /**
      * 提交AI媒体审核任务
+     *
+     * @return array{requestId: string, jobId: string, mediaId: string}
      */
     public function submitAIMediaAuditJob(
         string $mediaId,
         ?string $templateId = null,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
         $client = $this->clientFactory->createClient($config);
 
         $requestData = ['mediaId' => $mediaId];
-        if ($templateId !== null) {
+        if (null !== $templateId) {
             $requestData['templateId'] = $templateId;
         }
 
@@ -51,13 +57,15 @@ class VideoAuditService
 
     /**
      * 获取AI媒体审核任务详情
+     *
+     * @return array<string, mixed>
      */
     public function getAIMediaAuditJob(
         string $jobId,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -76,14 +84,14 @@ class VideoAuditService
                 'mediaId' => $response->body->mediaAuditJob->mediaId,
                 'type' => $response->body->mediaAuditJob->type,
                 'status' => $response->body->mediaAuditJob->status,
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'code' => $response->body->mediaAuditJob->code ?? null,
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'message' => $response->body->mediaAuditJob->message ?? null,
                 'creationTime' => $response->body->mediaAuditJob->creationTime,
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'completeTime' => $response->body->mediaAuditJob->completeTime ?? null,
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'data' => $response->body->mediaAuditJob->data ?? null,
             ],
         ];
@@ -91,13 +99,15 @@ class VideoAuditService
 
     /**
      * 获取媒体审核结果
+     *
+     * @return array<string, mixed>
      */
     public function getMediaAuditResult(
         string $mediaId,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -112,17 +122,17 @@ class VideoAuditService
         return [
             'requestId' => $response->body->requestId,
             'mediaAuditResult' => [
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'abnormalModules' => $response->body->mediaAuditResult->abnormalModules ?? '',
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'label' => $response->body->mediaAuditResult->label ?? '',
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'suggestion' => $response->body->mediaAuditResult->suggestion ?? '',
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'imageResult' => $this->formatImageResult($response->body->mediaAuditResult->imageResult ?? []),
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'textResult' => $this->formatTextResult($response->body->mediaAuditResult->textResult ?? []),
-                /** @phpstan-ignore-next-line */
+                /* @phpstan-ignore-next-line */
                 'videoResult' => $this->formatVideoResult($response->body->mediaAuditResult->videoResult ?? null),
             ],
         ];
@@ -130,11 +140,15 @@ class VideoAuditService
 
     /**
      * 批量提交审核任务
+     *
+     * @param array<int, string> $mediaIds
+     *
+     * @return array<string, array<string, mixed>>
      */
     public function batchSubmitAuditJobs(
         array $mediaIds,
         ?string $templateId = null,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
         $results = [];
         foreach ($mediaIds as $mediaId) {
@@ -147,6 +161,7 @@ class VideoAuditService
                 ];
             }
         }
+
         return $results;
     }
 
@@ -156,11 +171,16 @@ class VideoAuditService
     public function checkAuditStatus(string $jobId, ?AliyunVodConfig $config = null): string
     {
         $jobInfo = $this->getAIMediaAuditJob($jobId, $config);
+
         return $jobInfo['mediaAuditJob']['status'];
     }
 
     /**
      * 格式化图片审核结果
+     *
+     * @param array<int, mixed> $imageResult
+     *
+     * @return array<int, array{suggestion: string, label: string, type: string, url: string, result: mixed}>
      */
     private function formatImageResult(array $imageResult): array
     {
@@ -174,11 +194,16 @@ class VideoAuditService
                 'result' => $result->result ?? [],
             ];
         }
+
         return $formatted;
     }
 
     /**
      * 格式化文本审核结果
+     *
+     * @param array<int, mixed> $textResult
+     *
+     * @return array<int, array{suggestion: string, label: string, score: string, content: string}>
      */
     private function formatTextResult(array $textResult): array
     {
@@ -193,15 +218,18 @@ class VideoAuditService
                 'content' => $result->content ?? '',
             ];
         }
+
         return $formatted;
     }
 
     /**
      * 格式化视频审核结果
+     *
+     * @return array{suggestion: string, label: string, terrorismResult: mixed, pornResult: mixed, adResult: mixed, liveResult: mixed, logoResult: mixed}|null
      */
-    private function formatVideoResult($videoResult): ?array
+    private function formatVideoResult(mixed $videoResult): ?array
     {
-        if (!$videoResult) {
+        if (null === $videoResult || false === $videoResult) {
             return null;
         }
 
@@ -218,28 +246,37 @@ class VideoAuditService
 
     /**
      * 判断审核是否通过
+     *
+     * @param array<string, mixed> $auditResult
      */
     public function isAuditPassed(array $auditResult): bool
     {
         $suggestion = $auditResult['mediaAuditResult']['suggestion'] ?? '';
-        return $suggestion === 'pass';
+
+        return 'pass' === $suggestion;
     }
 
     /**
      * 判断审核是否需要人工复审
+     *
+     * @param array<string, mixed> $auditResult
      */
     public function needsManualReview(array $auditResult): bool
     {
         $suggestion = $auditResult['mediaAuditResult']['suggestion'] ?? '';
-        return $suggestion === 'review';
+
+        return 'review' === $suggestion;
     }
 
     /**
      * 判断审核是否被拒绝
+     *
+     * @param array<string, mixed> $auditResult
      */
     public function isAuditRejected(array $auditResult): bool
     {
         $suggestion = $auditResult['mediaAuditResult']['suggestion'] ?? '';
-        return $suggestion === 'block';
+
+        return 'block' === $suggestion;
     }
-} 
+}

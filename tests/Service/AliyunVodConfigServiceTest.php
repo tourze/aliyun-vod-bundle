@@ -1,199 +1,292 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Tests\Service;
 
-use Doctrine\ORM\EntityManagerInterface;
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
-use Tourze\AliyunVodBundle\Repository\AliyunVodConfigRepository;
 use Tourze\AliyunVodBundle\Service\AliyunVodConfigService;
+use Tourze\PHPUnitSymfonyKernelTest\AbstractIntegrationTestCase;
 
 /**
  * 阿里云VOD配置服务测试
+ *
+ * @internal
  */
-class AliyunVodConfigServiceTest extends TestCase
+#[CoversClass(AliyunVodConfigService::class)]
+#[RunTestsInSeparateProcesses]
+final class AliyunVodConfigServiceTest extends AbstractIntegrationTestCase
 {
-    private $entityManager;
-    private $repository;
-
-    protected function setUp(): void
+    protected function onSetUp(): void
     {
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->repository = $this->createMock(AliyunVodConfigRepository::class);
+        // 无需特殊设置
     }
 
-    public function test_construct_withValidDependencies(): void
+    public function testCreateConfigWithValidParameters(): void
     {
-        $service = new AliyunVodConfigService($this->entityManager, $this->repository);
-        
-        $this->assertInstanceOf(AliyunVodConfigService::class, $service);
+        $service = self::getService(AliyunVodConfigService::class);
+
+        $config = $service->createConfig(
+            'test-config',
+            'LTAI4Test123456789012345',
+            'test-secret-key',
+            'cn-shanghai',
+            false
+        );
+
+        $this->assertInstanceOf(AliyunVodConfig::class, $config);
+        $this->assertEquals('test-config', $config->getName());
+        $this->assertEquals('LTAI4Test123456789012345', $config->getAccessKeyId());
+        $this->assertEquals('cn-shanghai', $config->getRegionId());
+        $this->assertFalse($config->isDefault());
     }
 
-    public function test_service_hasRequiredMethods(): void
+    public function testDecryptSecretWithValidBase64(): void
     {
-        $service = new AliyunVodConfigService($this->entityManager, $this->repository);
-        
-        // These methods are guaranteed to exist on the service
-        $this->assertInstanceOf(AliyunVodConfigService::class, $service);
-    }
+        $service = self::getService(AliyunVodConfigService::class);
 
-    public function test_getDefaultConfig_methodSignature(): void
-    {
-        $service = new AliyunVodConfigService($this->entityManager, $this->repository);
-        
-        $reflection = new \ReflectionMethod($service, 'getDefaultConfig');
-        
-        $this->assertTrue($reflection->isPublic());
-        $this->assertEquals(0, $reflection->getNumberOfParameters());
-        
-        $returnType = $reflection->getReturnType();
-        $this->assertNotNull($returnType);
-        $this->assertTrue($returnType->allowsNull());
-    }
-
-    public function test_getActiveConfigs_methodSignature(): void
-    {
-        $service = new AliyunVodConfigService($this->entityManager, $this->repository);
-        
-        $reflection = new \ReflectionMethod($service, 'getActiveConfigs');
-        
-        $this->assertTrue($reflection->isPublic());
-        $this->assertEquals(0, $reflection->getNumberOfParameters());
-        
-        $returnType = $reflection->getReturnType();
-        $this->assertNotNull($returnType);
-        $this->assertEquals('array', (string) $returnType);
-    }
-
-    public function test_getConfigByName_methodSignature(): void
-    {
-        $service = new AliyunVodConfigService($this->entityManager, $this->repository);
-        
-        $reflection = new \ReflectionMethod($service, 'getConfigByName');
-        
-        $this->assertTrue($reflection->isPublic());
-        $this->assertEquals(1, $reflection->getNumberOfParameters());
-        
-        $parameters = $reflection->getParameters();
-        $this->assertEquals('name', $parameters[0]->getName());
-        $this->assertEquals('string', (string) $parameters[0]->getType());
-    }
-
-    public function test_createConfig_methodSignature(): void
-    {
-        $service = new AliyunVodConfigService($this->entityManager, $this->repository);
-        
-        $reflection = new \ReflectionMethod($service, 'createConfig');
-        
-        $this->assertTrue($reflection->isPublic());
-        $this->assertEquals(5, $reflection->getNumberOfParameters());
-        
-        $parameters = $reflection->getParameters();
-        $this->assertEquals('name', $parameters[0]->getName());
-        $this->assertEquals('accessKeyId', $parameters[1]->getName());
-        $this->assertEquals('accessKeySecret', $parameters[2]->getName());
-        $this->assertEquals('regionId', $parameters[3]->getName());
-        $this->assertEquals('isDefault', $parameters[4]->getName());
-    }
-
-    public function test_decryptSecret_methodSignature(): void
-    {
-        $service = new AliyunVodConfigService($this->entityManager, $this->repository);
-        
-        $reflection = new \ReflectionMethod($service, 'decryptSecret');
-        
-        $this->assertTrue($reflection->isPublic());
-        $this->assertEquals(1, $reflection->getNumberOfParameters());
-        
-        $parameters = $reflection->getParameters();
-        $this->assertEquals('encryptedSecret', $parameters[0]->getName());
-        $this->assertEquals('string', (string) $parameters[0]->getType());
-    }
-
-    public function test_service_classStructure(): void
-    {
-        $service = new AliyunVodConfigService($this->entityManager, $this->repository);
-        $reflection = new \ReflectionClass($service);
-        
-        $this->assertEquals(AliyunVodConfigService::class, $reflection->getName());
-        $this->assertFalse($reflection->isAbstract());
-        $this->assertFalse($reflection->isInterface());
-        $this->assertTrue($reflection->isInstantiable());
-    }
-
-    public function test_service_constructorDependencies(): void
-    {
-        $service = new AliyunVodConfigService($this->entityManager, $this->repository);
-        $reflection = new \ReflectionClass($service);
-        $constructor = $reflection->getConstructor();
-        
-        $this->assertNotNull($constructor);
-        $this->assertTrue($constructor->isPublic());
-        
-        $parameters = $constructor->getParameters();
-        $this->assertCount(2, $parameters);
-        
-        $entityManagerParam = $parameters[0];
-        $this->assertEquals('entityManager', $entityManagerParam->getName());
-        $this->assertFalse($entityManagerParam->isOptional());
-        
-        $repositoryParam = $parameters[1];
-        $this->assertEquals('configRepository', $repositoryParam->getName());
-        $this->assertFalse($repositoryParam->isOptional());
-    }
-
-    public function test_decryptSecret_basicFunctionality(): void
-    {
-        $service = new AliyunVodConfigService($this->entityManager, $this->repository);
-        
-        // 测试基本的解密功能（当前是base64解码）
-        $originalSecret = 'test_secret_123';
+        $originalSecret = 'my-secret-key-123';
         $encryptedSecret = base64_encode($originalSecret);
-        
+
         $result = $service->decryptSecret($encryptedSecret);
-        
         $this->assertEquals($originalSecret, $result);
     }
 
-    public function test_service_methodsReturnTypes(): void
+    public function testDecryptSecretWithInvalidBase64ReturnsOriginal(): void
     {
-        $service = new AliyunVodConfigService($this->entityManager, $this->repository);
-        
-        // 检查getDefaultConfig的返回类型
-        $getDefaultReflection = new \ReflectionMethod($service, 'getDefaultConfig');
-        $returnType = $getDefaultReflection->getReturnType();
-        $this->assertNotNull($returnType);
-        $this->assertTrue($returnType->allowsNull());
-        
-        // 检查getActiveConfigs的返回类型
-        $getActiveReflection = new \ReflectionMethod($service, 'getActiveConfigs');
-        $returnType = $getActiveReflection->getReturnType();
-        $this->assertNotNull($returnType);
-        $this->assertEquals('array', (string) $returnType);
-        
-        // 检查createConfig的返回类型
-        $createConfigReflection = new \ReflectionMethod($service, 'createConfig');
-        $returnType = $createConfigReflection->getReturnType();
-        $this->assertNotNull($returnType);
-        $this->assertEquals(AliyunVodConfig::class, (string) $returnType);
-        
-        // 检查decryptSecret的返回类型
-        $decryptReflection = new \ReflectionMethod($service, 'decryptSecret');
-        $returnType = $decryptReflection->getReturnType();
-        $this->assertNotNull($returnType);
-        $this->assertEquals('string', (string) $returnType);
+        $service = self::getService(AliyunVodConfigService::class);
+
+        $invalidBase64 = 'not-valid-base64-string!';
+        $result = $service->decryptSecret($invalidBase64);
+
+        $this->assertIsString($result);
+        $this->assertEquals($invalidBase64, $result);
     }
 
-    public function test_service_parameterValidation(): void
+    public function testDecryptSecretWithEmptyString(): void
     {
-        // 测试各种参数的有效性
-        $validNames = ['default', 'production', 'testing', 'development'];
-        $validRegions = ['cn-shanghai', 'cn-beijing', 'cn-hangzhou'];
-        $validAccessKeys = ['LTAI4G8mF9XxXxXxXxXxXxXx', 'LTAI4Test123456789012345'];
-        
-        // These are hardcoded non-empty values, no need to test
-        $this->assertCount(4, $validNames);
-        $this->assertCount(3, $validRegions);
-        $this->assertCount(2, $validAccessKeys);
+        $service = self::getService(AliyunVodConfigService::class);
+
+        $result = $service->decryptSecret('');
+        $this->assertEquals('', $result);
     }
-} 
+
+    public function testDeleteConfig(): void
+    {
+        $service = self::getService(AliyunVodConfigService::class);
+
+        // Create a config first
+        $config = $service->createConfig(
+            'test-config-to-delete',
+            'LTAI4Test123456789012345',
+            'test-secret-key',
+            'cn-shanghai',
+            false
+        );
+
+        $this->assertNotNull($config->getId());
+        $configId = $config->getId();
+
+        // Delete the config
+        $service->deleteConfig($config);
+
+        // Verify the config is deleted
+        $em = self::getEntityManager();
+        $deletedConfig = $em->find(AliyunVodConfig::class, $configId);
+        $this->assertNull($deletedConfig);
+    }
+
+    public function testUpdateConfig(): void
+    {
+        $service = self::getService(AliyunVodConfigService::class);
+
+        // Create a config first
+        $config = $service->createConfig(
+            'test-config-to-update',
+            'LTAI4Test123456789012345',
+            'test-secret-key',
+            'cn-shanghai',
+            false
+        );
+
+        $this->assertFalse($config->isDefault());
+
+        // Update the config to be default
+        $config->setIsDefault(true);
+        $config->setName('updated-config-name');
+
+        $service->updateConfig($config);
+
+        // Verify the config is updated
+        $em = self::getEntityManager();
+        $em->refresh($config);
+
+        $this->assertTrue($config->isDefault());
+        $this->assertEquals('updated-config-name', $config->getName());
+    }
+
+    public function testUpdateConfigWithDefaultHandling(): void
+    {
+        $service = self::getService(AliyunVodConfigService::class);
+
+        // Create first config as default
+        $config1 = $service->createConfig(
+            'first-config',
+            'LTAI4Test123456789012345',
+            'test-secret-key',
+            'cn-shanghai',
+            true
+        );
+
+        $this->assertTrue($config1->isDefault());
+
+        // Create second config
+        $config2 = $service->createConfig(
+            'second-config',
+            'LTAI4Test123456789012346',
+            'test-secret-key-2',
+            'cn-shanghai',
+            false
+        );
+
+        $this->assertFalse($config2->isDefault());
+
+        // Update second config to be default
+        $config2->setIsDefault(true);
+        $service->updateConfig($config2);
+
+        // Verify first config is no longer default and second config is default
+        $em = self::getEntityManager();
+        $em->refresh($config1);
+        $em->refresh($config2);
+
+        $this->assertFalse($config1->isDefault());
+        $this->assertTrue($config2->isDefault());
+    }
+
+    public function testDeleteConfigWithAssociatedEntities(): void
+    {
+        $service = self::getService(AliyunVodConfigService::class);
+
+        // Create a config
+        $config = $service->createConfig(
+            'config-with-associations',
+            'LTAI4Test123456789012345',
+            'test-secret-key',
+            'cn-shanghai',
+            false
+        );
+
+        $configId = $config->getId();
+        $this->assertNotNull($configId);
+
+        // Delete the config (should handle cascading properly)
+        $service->deleteConfig($config);
+
+        // Verify the config is deleted
+        $em = self::getEntityManager();
+        $deletedConfig = $em->find(AliyunVodConfig::class, $configId);
+        $this->assertNull($deletedConfig);
+    }
+
+    public function testUpdateConfigWithNonDefaultConfig(): void
+    {
+        $service = self::getService(AliyunVodConfigService::class);
+
+        // Create a non-default config
+        $config = $service->createConfig(
+            'non-default-config',
+            'LTAI4Test123456789012345',
+            'test-secret-key',
+            'cn-shanghai',
+            false
+        );
+
+        $this->assertFalse($config->isDefault());
+
+        // Update the config (keep it non-default)
+        $config->setName('updated-non-default-config');
+        $config->setRegionId('cn-beijing');
+
+        $service->updateConfig($config);
+
+        // Verify the config is updated but still not default
+        $em = self::getEntityManager();
+        $em->refresh($config);
+
+        $this->assertFalse($config->isDefault());
+        $this->assertEquals('updated-non-default-config', $config->getName());
+        $this->assertEquals('cn-beijing', $config->getRegionId());
+    }
+
+    public function testDeleteDefaultConfig(): void
+    {
+        $service = self::getService(AliyunVodConfigService::class);
+
+        // Create a default config
+        $config = $service->createConfig(
+            'default-config-to-delete',
+            'LTAI4Test123456789012345',
+            'test-secret-key',
+            'cn-shanghai',
+            true
+        );
+
+        $this->assertTrue($config->isDefault());
+        $configId = $config->getId();
+
+        // Delete the default config
+        $service->deleteConfig($config);
+
+        // Verify the config is deleted
+        $em = self::getEntityManager();
+        $deletedConfig = $em->find(AliyunVodConfig::class, $configId);
+        $this->assertNull($deletedConfig);
+    }
+
+    public function testUpdateConfigMultipleConfigs(): void
+    {
+        $service = self::getService(AliyunVodConfigService::class);
+
+        // Create multiple configs
+        $config1 = $service->createConfig(
+            'config-1',
+            'LTAI4Test123456789012345',
+            'test-secret-key-1',
+            'cn-shanghai',
+            true
+        );
+
+        $config2 = $service->createConfig(
+            'config-2',
+            'LTAI4Test123456789012346',
+            'test-secret-key-2',
+            'cn-beijing',
+            false
+        );
+
+        $config3 = $service->createConfig(
+            'config-3',
+            'LTAI4Test123456789012347',
+            'test-secret-key-3',
+            'cn-hangzhou',
+            false
+        );
+
+        // Update config2 to be default
+        $config2->setIsDefault(true);
+        $service->updateConfig($config2);
+
+        // Verify only config2 is default
+        $em = self::getEntityManager();
+        $em->refresh($config1);
+        $em->refresh($config2);
+        $em->refresh($config3);
+
+        $this->assertFalse($config1->isDefault());
+        $this->assertTrue($config2->isDefault());
+        $this->assertFalse($config3->isDefault());
+    }
+}

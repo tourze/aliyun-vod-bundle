@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Command;
 
+use Monolog\Attribute\WithMonologChannel;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -14,17 +17,17 @@ use Tourze\AliyunVodBundle\Service\StatisticsService;
 /**
  * 清理过期播放记录
  */
-#[AsCommand(
-    name: self::NAME,
-    description: '清理过期的播放记录数据'
-)]
+#[AsCommand(name: self::NAME, description: '清理过期的播放记录数据', help: <<<'TXT'
+    此命令清理指定天数之前的播放记录，默认保留90天的数据。
+    TXT)]
+#[WithMonologChannel(channel: 'aliyun_vod')]
 class CleanupPlayRecordsCommand extends Command
 {
     public const NAME = 'aliyun-vod:cleanup:play-records';
 
     public function __construct(
         private readonly StatisticsService $statisticsService,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
     ) {
         parent::__construct();
     }
@@ -35,13 +38,14 @@ class CleanupPlayRecordsCommand extends Command
             ->addOption('days', 'd', InputOption::VALUE_OPTIONAL, '保留天数', 90)
             ->addOption('dry-run', null, InputOption::VALUE_NONE, '试运行模式，不实际删除数据')
             ->addOption('force', 'f', InputOption::VALUE_NONE, '强制执行，不询问确认')
-            ->setHelp('此命令清理指定天数之前的播放记录，默认保留90天的数据。');
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $daysToKeep = (int) $input->getOption('days');
+        $daysOption = $input->getOption('days');
+        $daysToKeep = is_numeric($daysOption) ? (int) $daysOption : 90;
         $dryRun = (bool) $input->getOption('dry-run');
         $force = (bool) $input->getOption('force');
 
@@ -49,6 +53,7 @@ class CleanupPlayRecordsCommand extends Command
 
         if ($daysToKeep < 1) {
             $io->error('保留天数必须大于0');
+
             return Command::FAILURE;
         }
 
@@ -58,6 +63,7 @@ class CleanupPlayRecordsCommand extends Command
         if (!$force && !$dryRun) {
             if (!$io->confirm('确定要执行清理操作吗？此操作不可逆！', false)) {
                 $io->note('操作已取消');
+
                 return Command::SUCCESS;
             }
         }
@@ -66,13 +72,14 @@ class CleanupPlayRecordsCommand extends Command
             if ($dryRun) {
                 $io->note('试运行模式：不会实际删除数据');
                 $io->success('试运行完成');
+
                 return Command::SUCCESS;
             }
 
             $deletedCount = $this->statisticsService->cleanExpiredPlayRecords($daysToKeep);
 
             $io->success([
-                "清理完成！",
+                '清理完成！',
                 "删除记录数: {$deletedCount}",
                 "保留天数: {$daysToKeep}",
             ]);
@@ -84,7 +91,6 @@ class CleanupPlayRecordsCommand extends Command
             ]);
 
             return Command::SUCCESS;
-
         } catch (\Throwable $e) {
             $io->error("清理过程中发生错误: {$e->getMessage()}");
             $this->logger->error('播放记录清理失败', [
@@ -92,7 +98,8 @@ class CleanupPlayRecordsCommand extends Command
                 'exception' => $e,
                 'daysToKeep' => $daysToKeep,
             ]);
+
             return Command::FAILURE;
         }
     }
-} 
+}

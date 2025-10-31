@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Controller\Statistics;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,10 +13,10 @@ use Tourze\AliyunVodBundle\Service\StatisticsService;
 /**
  * 获取用户播放行为分析控制器
  */
-class UserBehaviorController extends AbstractController
+final class UserBehaviorController extends AbstractController
 {
     public function __construct(
-        private readonly StatisticsService $statisticsService
+        private readonly StatisticsService $statisticsService,
     ) {
     }
 
@@ -24,7 +26,7 @@ class UserBehaviorController extends AbstractController
         try {
             $ipAddress = $request->request->get('ipAddress');
 
-            if (!$ipAddress) {
+            if (!is_string($ipAddress) || '' === $ipAddress) {
                 return new JsonResponse([
                     'success' => false,
                     'message' => 'IP地址不能为空',
@@ -37,7 +39,6 @@ class UserBehaviorController extends AbstractController
                 'success' => true,
                 'data' => $behavior,
             ]);
-
         } catch (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,

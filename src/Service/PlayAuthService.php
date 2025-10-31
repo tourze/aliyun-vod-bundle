@@ -1,32 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Service;
 
 use AlibabaCloud\SDK\Vod\V20170321\Models\GetVideoPlayAuthRequest;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
 use Tourze\AliyunVodBundle\Exception\AliyunVodException;
 
 /**
  * 播放凭证服务
  */
-class PlayAuthService
+#[Autoconfigure(public: true)]
+readonly class PlayAuthService
 {
     public function __construct(
-        private readonly VodClientFactory $clientFactory,
-        private readonly AliyunVodConfigService $configService
+        private VodClientFactory $clientFactory,
+        private AliyunVodConfigService $configService,
     ) {
     }
 
     /**
      * 获取视频播放凭证
+     *
+     * @return array{videoId: string, playAuth: string, videoMeta: array{title: string, duration: float, coverURL: string, status: string}, requestId: string}
      */
     public function getPlayAuth(
         string $videoId,
         ?int $authInfoTimeout = 3000,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -54,11 +60,15 @@ class PlayAuthService
 
     /**
      * 批量获取播放凭证
+     *
+     * @param array<int, string> $videoIds
+     *
+     * @return array<string, array<string, mixed>>
      */
     public function batchGetPlayAuth(
         array $videoIds,
         ?int $authInfoTimeout = 3000,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
         $results = [];
         foreach ($videoIds as $videoId) {
@@ -71,6 +81,7 @@ class PlayAuthService
                 ];
             }
         }
+
         return $results;
     }
 
@@ -82,6 +93,6 @@ class PlayAuthService
     {
         // 这里应该实现真正的凭证验证逻辑
         // 暂时返回true作为占位符
-        return !empty($playAuth);
+        return '' !== $playAuth;
     }
 }

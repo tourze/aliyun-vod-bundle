@@ -1,19 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Tourze\AliyunVodBundle\Entity\Video;
+use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
 
 /**
  * 视频仓储
  *
- * @method Video|null find($id, $lockMode = null, $lockVersion = null)
- * @method Video|null findOneBy(array $criteria, array $orderBy = null)
- * @method Video[] findAll()
- * @method Video[] findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends ServiceEntityRepository<Video>
  */
+#[AsRepository(entityClass: Video::class)]
 class VideoRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -31,6 +32,8 @@ class VideoRepository extends ServiceEntityRepository
 
     /**
      * 查找有效的视频
+     *
+     * @return array<int, Video>
      */
     public function findValidVideos(): array
     {
@@ -42,6 +45,8 @@ class VideoRepository extends ServiceEntityRepository
 
     /**
      * 根据状态查找视频
+     *
+     * @return array<int, Video>
      */
     public function findByStatus(string $status): array
     {
@@ -49,5 +54,23 @@ class VideoRepository extends ServiceEntityRepository
             ['status' => $status, 'valid' => true],
             ['createdTime' => 'DESC']
         );
+    }
+
+    public function save(Video $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(Video $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 }

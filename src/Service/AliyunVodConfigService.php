@@ -1,19 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
 use Tourze\AliyunVodBundle\Repository\AliyunVodConfigRepository;
 
 /**
  * 阿里云VOD配置管理服务
  */
-class AliyunVodConfigService
+#[Autoconfigure(public: true)]
+readonly class AliyunVodConfigService
 {
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly AliyunVodConfigRepository $configRepository
+        private EntityManagerInterface $entityManager,
+        private AliyunVodConfigRepository $configRepository,
     ) {
     }
 
@@ -41,6 +45,8 @@ class AliyunVodConfigService
 
     /**
      * 获取所有激活的配置
+     *
+     * @return array<int, AliyunVodConfig>
      */
     public function getActiveConfigs(): array
     {
@@ -55,7 +61,7 @@ class AliyunVodConfigService
         string $accessKeyId,
         string $accessKeySecret,
         string $regionId = 'cn-shanghai',
-        bool $isDefault = false
+        bool $isDefault = false,
     ): AliyunVodConfig {
         // 如果设置为默认配置，先取消其他默认配置
         if ($isDefault) {
@@ -63,11 +69,11 @@ class AliyunVodConfigService
         }
 
         $config = new AliyunVodConfig();
-        $config->setName($name)
-            ->setAccessKeyId($accessKeyId)
-            ->setAccessKeySecret($this->encryptSecret($accessKeySecret))
-            ->setRegionId($regionId)
-            ->setIsDefault($isDefault);
+        $config->setName($name);
+        $config->setAccessKeyId($accessKeyId);
+        $config->setAccessKeySecret($this->encryptSecret($accessKeySecret));
+        $config->setRegionId($regionId);
+        $config->setIsDefault($isDefault);
 
         $this->entityManager->persist($config);
         $this->entityManager->flush();
@@ -117,11 +123,13 @@ class AliyunVodConfigService
             ->set('c.isDefault', ':false')
             ->where('c.isDefault = :true')
             ->setParameter('false', false)
-            ->setParameter('true', true);
+            ->setParameter('true', true)
+        ;
 
-        if ($excludeId !== null) {
+        if (null !== $excludeId) {
             $qb->andWhere('c.id != :excludeId')
-                ->setParameter('excludeId', $excludeId);
+                ->setParameter('excludeId', $excludeId)
+            ;
         }
 
         $qb->getQuery()->execute();
@@ -146,6 +154,8 @@ class AliyunVodConfigService
     {
         // 这里应该使用真正的解密算法
         // 暂时使用base64解码作为占位符
-        return base64_decode($encryptedSecret);
+        $decoded = base64_decode($encryptedSecret, true);
+
+        return false !== $decoded ? $decoded : $encryptedSecret;
     }
 }

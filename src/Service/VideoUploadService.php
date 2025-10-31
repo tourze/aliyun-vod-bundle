@@ -1,35 +1,41 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Service;
 
 use AlibabaCloud\SDK\Vod\V20170321\Models\CreateUploadVideoRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\RefreshUploadVideoRequest;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
 use Tourze\AliyunVodBundle\Exception\AliyunVodException;
 
 /**
  * 视频上传服务
  */
-class VideoUploadService
+#[Autoconfigure(public: true)]
+readonly class VideoUploadService
 {
     public function __construct(
-        private readonly VodClientFactory $clientFactory,
-        private readonly AliyunVodConfigService $configService
+        private VodClientFactory $clientFactory,
+        private AliyunVodConfigService $configService,
     ) {
     }
 
     /**
      * 创建上传视频凭证
+     *
+     * @return array{videoId: string, uploadAddress: string, uploadAuth: string, requestId: string}
      */
     public function createUploadAuth(
         string $title,
         string $fileName,
         ?string $description = null,
         ?string $tags = null,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -56,13 +62,15 @@ class VideoUploadService
 
     /**
      * 刷新上传凭证
+     *
+     * @return array{videoId: string, uploadAddress: string, uploadAuth: string, requestId: string}
      */
     public function refreshUploadAuth(
         string $videoId,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -86,6 +94,8 @@ class VideoUploadService
      * 获取上传进度
      * 注意：阿里云VOD不直接提供上传进度查询API
      * 需要在客户端实现进度回调
+     *
+     * @return array{videoId: string, message: string}
      */
     public function getUploadProgress(string $videoId): array
     {

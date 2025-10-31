@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Controller\VideoUpload;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -10,10 +12,10 @@ use Tourze\AliyunVodBundle\Service\VideoUploadService;
 /**
  * 上传进度查询控制器
  */
-class ProgressController extends AbstractController
+final class ProgressController extends AbstractController
 {
     public function __construct(
-        private readonly VideoUploadService $uploadService
+        private readonly VideoUploadService $uploadService,
     ) {
     }
 
@@ -27,7 +29,6 @@ class ProgressController extends AbstractController
                 'success' => true,
                 'data' => $result,
             ]);
-
         } catch (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,

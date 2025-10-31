@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Controller\Statistics;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,10 +13,10 @@ use Tourze\AliyunVodBundle\Service\StatisticsService;
 /**
  * 清理过期播放记录控制器
  */
-class CleanupController extends AbstractController
+final class CleanupController extends AbstractController
 {
     public function __construct(
-        private readonly StatisticsService $statisticsService
+        private readonly StatisticsService $statisticsService,
     ) {
     }
 
@@ -30,7 +32,6 @@ class CleanupController extends AbstractController
                 'message' => "已清理 {$deletedCount} 条过期记录",
                 'deletedCount' => $deletedCount,
             ]);
-
         } catch (\Throwable $e) {
             return new JsonResponse([
                 'success' => false,

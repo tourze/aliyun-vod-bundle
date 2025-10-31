@@ -1,20 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Tourze\AliyunVodBundle\Entity\TranscodeTask;
 use Tourze\AliyunVodBundle\Entity\Video;
+use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
 
 /**
  * 转码任务仓储
  *
- * @method TranscodeTask|null find($id, $lockMode = null, $lockVersion = null)
- * @method TranscodeTask|null findOneBy(array $criteria, array $orderBy = null)
- * @method TranscodeTask[] findAll()
- * @method TranscodeTask[] findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @extends ServiceEntityRepository<TranscodeTask>
  */
+#[AsRepository(entityClass: TranscodeTask::class)]
 class TranscodeTaskRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -32,6 +33,8 @@ class TranscodeTaskRepository extends ServiceEntityRepository
 
     /**
      * 根据视频查找转码任务
+     *
+     * @return array<int, TranscodeTask>
      */
     public function findByVideo(Video $video): array
     {
@@ -43,6 +46,8 @@ class TranscodeTaskRepository extends ServiceEntityRepository
 
     /**
      * 根据状态查找转码任务
+     *
+     * @return array<int, TranscodeTask>
      */
     public function findByStatus(string $status): array
     {
@@ -54,6 +59,8 @@ class TranscodeTaskRepository extends ServiceEntityRepository
 
     /**
      * 查找进行中的转码任务
+     *
+     * @return array<int, TranscodeTask>
      */
     public function findProcessingTasks(): array
     {
@@ -65,6 +72,8 @@ class TranscodeTaskRepository extends ServiceEntityRepository
 
     /**
      * 查找已完成的转码任务
+     *
+     * @return array<int, TranscodeTask>
      */
     public function findCompletedTasks(): array
     {
@@ -72,6 +81,25 @@ class TranscodeTaskRepository extends ServiceEntityRepository
             ->where('t.completedTime IS NOT NULL')
             ->orderBy('t.completedTime', 'DESC')
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
+    }
+
+    public function save(TranscodeTask $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(TranscodeTask $entity, bool $flush = true): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
     }
 }

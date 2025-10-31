@@ -1,34 +1,40 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Service;
 
 use AlibabaCloud\SDK\Vod\V20170321\Models\DeleteVideoRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\GetPlayInfoRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\GetVideoInfoRequest;
 use AlibabaCloud\SDK\Vod\V20170321\Models\UpdateVideoInfoRequest;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
 use Tourze\AliyunVodBundle\Exception\AliyunVodException;
 
 /**
  * 视频管理服务
  */
-class VideoManageService
+#[Autoconfigure(public: true)]
+readonly class VideoManageService
 {
     public function __construct(
-        private readonly VodClientFactory $clientFactory,
-        private readonly AliyunVodConfigService $configService
+        private VodClientFactory $clientFactory,
+        private AliyunVodConfigService $configService,
     ) {
     }
 
     /**
      * 获取视频信息
+     *
+     * @return array{videoId: string, title: string, description: string, duration: float, size: int, status: string, creationTime: string, modificationTime: string, coverURL: string, snapshots: mixed, tags: string}
      */
     public function getVideoInfo(
         string $videoId,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -58,13 +64,15 @@ class VideoManageService
 
     /**
      * 获取视频播放信息
+     *
+     * @return array<string, mixed>
      */
     public function getPlayInfo(
         string $videoId,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): array {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -111,10 +119,10 @@ class VideoManageService
         ?string $title = null,
         ?string $description = null,
         ?string $tags = null,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): bool {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -129,7 +137,7 @@ class VideoManageService
 
         $response = $client->updateVideoInfo($request);
 
-        return !empty($response->body->requestId);
+        return '' !== $response->body->requestId && null !== $response->body->requestId;
     }
 
     /**
@@ -137,10 +145,10 @@ class VideoManageService
      */
     public function deleteVideo(
         string $videoIds,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): bool {
-        $config = $config ?? $this->configService->getDefaultConfig();
-        if ($config === null) {
+        $config ??= $this->configService->getDefaultConfig();
+        if (null === $config) {
             throw new AliyunVodException('未找到可用的阿里云VOD配置');
         }
 
@@ -152,15 +160,17 @@ class VideoManageService
 
         $response = $client->deleteVideo($request);
 
-        return !empty($response->body->requestId);
+        return '' !== $response->body->requestId && null !== $response->body->requestId;
     }
 
     /**
      * 批量删除视频
+     *
+     * @param array<int, string> $videoIds
      */
     public function batchDeleteVideos(
         array $videoIds,
-        ?AliyunVodConfig $config = null
+        ?AliyunVodConfig $config = null,
     ): bool {
         return $this->deleteVideo(implode(',', $videoIds), $config);
     }

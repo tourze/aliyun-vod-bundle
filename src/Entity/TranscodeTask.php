@@ -1,9 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\AliyunVodBundle\Entity;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Tourze\AliyunVodBundle\Repository\TranscodeTaskRepository;
 use Tourze\DoctrineTimestampBundle\Attribute\CreateTimeColumn;
 use Tourze\DoctrineTimestampBundle\Attribute\UpdateTimeColumn;
@@ -17,42 +20,55 @@ use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 class TranscodeTask implements \Stringable
 {
     use TimestampableAware;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => '主键ID'])]
     private int $id = 0;
 
-    #[ORM\ManyToOne(targetEntity: Video::class)]
+    #[ORM\ManyToOne(targetEntity: Video::class, cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false, options: ['comment' => '关联的视频'])]
+    #[Assert\NotNull]
     private Video $video;
 
     #[ORM\Column(type: Types::STRING, length: 100, unique: true, options: ['comment' => '阿里云任务ID'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 100)]
     private string $taskId;
 
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true, options: ['comment' => '转码模板ID'])]
+    #[Assert\Length(max: 100)]
     private ?string $templateId = null;
 
     #[ORM\Column(type: Types::STRING, length: 50, options: ['comment' => '任务状态'])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 50)]
     private string $status = 'Processing';
 
     #[ORM\Column(type: Types::INTEGER, options: ['default' => 0, 'comment' => '转码进度（0-100）'])]
+    #[Assert\Range(min: 0, max: 100)]
     private int $progress = 0;
 
     #[ORM\Column(type: Types::STRING, length: 100, nullable: true, options: ['comment' => '错误代码'])]
+    #[Assert\Length(max: 100)]
     private ?string $errorCode = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '错误信息'])]
+    #[Assert\Length(max: 65535)]
     private ?string $errorMessage = null;
 
     #[CreateTimeColumn]
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, options: ['comment' => '创建时间'])]
+    #[Assert\NotNull]
     private \DateTimeImmutable $createdTime;
 
     #[UpdateTimeColumn]
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, options: ['comment' => '更新时间'])]
+    #[Assert\NotNull]
     private \DateTimeImmutable $updatedTime;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '完成时间'])]
+    #[Assert\Type(type: \DateTimeImmutable::class)]
     private ?\DateTimeImmutable $completedTime = null;
 
     public function __construct()
@@ -76,11 +92,10 @@ class TranscodeTask implements \Stringable
         return $this->video;
     }
 
-    public function setVideo(Video $video): self
+    public function setVideo(Video $video): void
     {
         $this->video = $video;
         $this->updatedTime = new \DateTimeImmutable();
-        return $this;
     }
 
     public function getTaskId(): string
@@ -88,11 +103,10 @@ class TranscodeTask implements \Stringable
         return $this->taskId;
     }
 
-    public function setTaskId(string $taskId): self
+    public function setTaskId(string $taskId): void
     {
         $this->taskId = $taskId;
         $this->updatedTime = new \DateTimeImmutable();
-        return $this;
     }
 
     public function getTemplateId(): ?string
@@ -100,11 +114,10 @@ class TranscodeTask implements \Stringable
         return $this->templateId;
     }
 
-    public function setTemplateId(?string $templateId): self
+    public function setTemplateId(?string $templateId): void
     {
         $this->templateId = $templateId;
         $this->updatedTime = new \DateTimeImmutable();
-        return $this;
     }
 
     public function getStatus(): string
@@ -112,11 +125,10 @@ class TranscodeTask implements \Stringable
         return $this->status;
     }
 
-    public function setStatus(string $status): self
+    public function setStatus(string $status): void
     {
         $this->status = $status;
         $this->updatedTime = new \DateTimeImmutable();
-        return $this;
     }
 
     public function getProgress(): int
@@ -124,11 +136,10 @@ class TranscodeTask implements \Stringable
         return $this->progress;
     }
 
-    public function setProgress(int $progress): self
+    public function setProgress(int $progress): void
     {
         $this->progress = $progress;
         $this->updatedTime = new \DateTimeImmutable();
-        return $this;
     }
 
     public function getErrorCode(): ?string
@@ -136,11 +147,10 @@ class TranscodeTask implements \Stringable
         return $this->errorCode;
     }
 
-    public function setErrorCode(?string $errorCode): self
+    public function setErrorCode(?string $errorCode): void
     {
         $this->errorCode = $errorCode;
         $this->updatedTime = new \DateTimeImmutable();
-        return $this;
     }
 
     public function getErrorMessage(): ?string
@@ -148,11 +158,10 @@ class TranscodeTask implements \Stringable
         return $this->errorMessage;
     }
 
-    public function setErrorMessage(?string $errorMessage): self
+    public function setErrorMessage(?string $errorMessage): void
     {
         $this->errorMessage = $errorMessage;
         $this->updatedTime = new \DateTimeImmutable();
-        return $this;
     }
 
     public function getCreatedTime(): \DateTimeImmutable
@@ -170,11 +179,10 @@ class TranscodeTask implements \Stringable
         return $this->completedTime;
     }
 
-    public function setCompletedTime(?\DateTimeImmutable $completedTime): self
+    public function setCompletedTime(?\DateTimeImmutable $completedTime): void
     {
         $this->completedTime = $completedTime;
         $this->updatedTime = new \DateTimeImmutable();
-        return $this;
     }
 
     /**
@@ -184,6 +192,7 @@ class TranscodeTask implements \Stringable
     {
         $this->completedTime = new \DateTimeImmutable();
         $this->updatedTime = new \DateTimeImmutable();
+
         return $this;
     }
 
@@ -192,6 +201,6 @@ class TranscodeTask implements \Stringable
      */
     public function isCompleted(): bool
     {
-        return $this->completedTime !== null;
+        return null !== $this->completedTime;
     }
 }
