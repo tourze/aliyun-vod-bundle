@@ -19,6 +19,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Tourze\AliyunVodBundle\Entity\TranscodeTask;
 
 /**
@@ -94,8 +96,13 @@ final class TranscodeTaskCrudController extends AbstractCrudController
     }
 
     #[AdminAction(routeName: 'refresh_status', routePath: '/refresh-status')]
-    public function refreshStatus(): void
+    public function refreshStatus(): RedirectResponse|Response
     {
         $this->addFlash('info', '刷新状态功能待实现');
+
+        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+            'action' => 'index',
+            'entity' => 'TranscodeTask'
+        ]));
     }
 }

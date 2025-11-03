@@ -255,9 +255,9 @@ final class VideoCrudControllerTest extends AbstractEasyAdminControllerTestCase
     public function testViewStatsAction(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+
+        // 使用认证客户端的创建方法来确保正确的安全上下文
+        $client = $this->createAuthenticatedClient();
 
         $video = $this->createTestVideo();
 
@@ -271,9 +271,9 @@ final class VideoCrudControllerTest extends AbstractEasyAdminControllerTestCase
     public function testFilterByTitle(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+
+        // 使用认证客户端的创建方法来确保正确的安全上下文
+        $client = $this->createAuthenticatedClient();
 
         $video = $this->createTestVideo();
 
@@ -285,9 +285,22 @@ final class VideoCrudControllerTest extends AbstractEasyAdminControllerTestCase
     public function testFilterByStatus(): void
     {
         self::ensureKernelShutdown();
+
+        // 创建客户端并使用更安全的登录方式
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+
+        // 使用自定义登录方法确保角色正确设置
+        $user = $this->loginAsAdmin($client);
+
+        // 验证登录状态
+        $token = self::getContainer()->get('security.token_storage')->getToken();
+        if (!$token || !in_array('ROLE_ADMIN', $token->getRoleNames())) {
+            self::fail('用户登录后没有获得 ROLE_ADMIN 角色');
+        }
+
+        // 使用认证客户端的创建方法来确保正确的安全上下文
+        $client = $this->createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/video');
 
@@ -298,9 +311,9 @@ final class VideoCrudControllerTest extends AbstractEasyAdminControllerTestCase
     public function testFilterByVideoId(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+
+        // 使用认证客户端的创建方法来确保正确的安全上下文
+        $client = $this->createAuthenticatedClient();
 
         $video = $this->createTestVideo();
 

@@ -107,12 +107,7 @@ final class AliyunVodConfigCrudControllerTest extends AbstractEasyAdminControlle
     public function testGetEntityFqcn(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-
-        // 手动设置静态客户端以供断言方法使用
-        self::getClient($client);
-
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/config');
 
@@ -123,9 +118,7 @@ final class AliyunVodConfigCrudControllerTest extends AbstractEasyAdminControlle
     public function testConfigureCrud(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/config');
 
@@ -136,9 +129,7 @@ final class AliyunVodConfigCrudControllerTest extends AbstractEasyAdminControlle
     public function testConfigureActions(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/config');
 
@@ -149,9 +140,7 @@ final class AliyunVodConfigCrudControllerTest extends AbstractEasyAdminControlle
     public function testConfigureFields(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/config');
 
@@ -162,9 +151,7 @@ final class AliyunVodConfigCrudControllerTest extends AbstractEasyAdminControlle
     public function testTestConnectionAction(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/config');
 
@@ -174,9 +161,7 @@ final class AliyunVodConfigCrudControllerTest extends AbstractEasyAdminControlle
     public function testSetDefaultAction(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/config');
 
@@ -224,9 +209,7 @@ final class AliyunVodConfigCrudControllerTest extends AbstractEasyAdminControlle
     public function testControllerHasCorrectAnnotations(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/config');
 

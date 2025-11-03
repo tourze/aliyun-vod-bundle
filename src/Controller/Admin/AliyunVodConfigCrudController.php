@@ -19,6 +19,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\BooleanFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\DateTimeFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\TextFilter;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
 
 /**
@@ -138,19 +140,29 @@ final class AliyunVodConfigCrudController extends AbstractCrudController
      * 测试连接
      */
     #[AdminAction(routeName: 'test_connection', routePath: '/test-connection')]
-    public function testConnection(): void
+    public function testConnection(): RedirectResponse|Response
     {
         // TODO: 实现测试连接功能
         $this->addFlash('success', '连接测试功能待实现');
+
+        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+            'action' => 'index',
+            'entity' => 'AliyunVodConfig'
+        ]));
     }
 
     /**
      * 设为默认配置
      */
     #[AdminAction(routeName: 'set_default', routePath: '/set-default')]
-    public function setDefault(): void
+    public function setDefault(): RedirectResponse|Response
     {
         // TODO: 实现设为默认配置功能
         $this->addFlash('success', '设为默认配置功能待实现');
+
+        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+            'action' => 'index',
+            'entity' => 'AliyunVodConfig'
+        ]));
     }
 }

@@ -19,6 +19,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\DateTimeFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\TextFilter;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Tourze\AliyunVodBundle\Entity\PlayRecord;
 
 /**
@@ -92,8 +94,13 @@ final class PlayRecordCrudController extends AbstractCrudController
     }
 
     #[AdminAction(routeName: 'view_stats', routePath: '/view-stats')]
-    public function viewStats(): void
+    public function viewStats(): RedirectResponse|Response
     {
         $this->addFlash('info', '查看统计功能待实现');
+
+        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+            'action' => 'index',
+            'entity' => 'PlayRecord'
+        ]));
     }
 }

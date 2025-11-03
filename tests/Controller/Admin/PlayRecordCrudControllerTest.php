@@ -90,9 +90,7 @@ final class PlayRecordCrudControllerTest extends AbstractEasyAdminControllerTest
     public function testIndexPageAccessible(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/play-record');
 
@@ -103,9 +101,7 @@ final class PlayRecordCrudControllerTest extends AbstractEasyAdminControllerTest
     public function testDetailPageAccessible(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $playRecord = $this->createTestPlayRecord();
 
@@ -118,9 +114,7 @@ final class PlayRecordCrudControllerTest extends AbstractEasyAdminControllerTest
     public function testNewActionDisabled(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/play-record?crudAction=new');
 
@@ -132,9 +126,7 @@ final class PlayRecordCrudControllerTest extends AbstractEasyAdminControllerTest
     public function testEditActionDisabled(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $playRecord = $this->createTestPlayRecord();
 
@@ -148,9 +140,7 @@ final class PlayRecordCrudControllerTest extends AbstractEasyAdminControllerTest
     public function testViewStatsAction(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $playRecord = $this->createTestPlayRecord();
 
@@ -164,9 +154,7 @@ final class PlayRecordCrudControllerTest extends AbstractEasyAdminControllerTest
     public function testFilterByVideo(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/play-record');
 
@@ -177,9 +165,7 @@ final class PlayRecordCrudControllerTest extends AbstractEasyAdminControllerTest
     public function testFilterByIpAddress(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/play-record');
 
@@ -190,9 +176,7 @@ final class PlayRecordCrudControllerTest extends AbstractEasyAdminControllerTest
     public function testFilterByDeviceType(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/play-record');
 

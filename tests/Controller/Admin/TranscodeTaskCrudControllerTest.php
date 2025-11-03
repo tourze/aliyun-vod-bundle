@@ -84,9 +84,7 @@ final class TranscodeTaskCrudControllerTest extends AbstractEasyAdminControllerT
     public function testIndexPageAccessible(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/transcode-task');
 
@@ -97,9 +95,7 @@ final class TranscodeTaskCrudControllerTest extends AbstractEasyAdminControllerT
     public function testDetailPageAccessible(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $transcodeTask = $this->createTestTranscodeTask();
 
@@ -112,9 +108,7 @@ final class TranscodeTaskCrudControllerTest extends AbstractEasyAdminControllerT
     public function testNewActionDisabled(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/transcode-task?crudAction=new');
 
@@ -126,9 +120,7 @@ final class TranscodeTaskCrudControllerTest extends AbstractEasyAdminControllerT
     public function testEditActionDisabled(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $transcodeTask = $this->createTestTranscodeTask();
 
@@ -142,9 +134,7 @@ final class TranscodeTaskCrudControllerTest extends AbstractEasyAdminControllerT
     public function testRefreshStatusAction(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $transcodeTask = $this->createTestTranscodeTask();
 
@@ -158,9 +148,7 @@ final class TranscodeTaskCrudControllerTest extends AbstractEasyAdminControllerT
     public function testFilterByVideo(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/transcode-task');
 
@@ -171,9 +159,7 @@ final class TranscodeTaskCrudControllerTest extends AbstractEasyAdminControllerT
     public function testFilterByStatus(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $client->request('GET', '/admin/aliyun-vod/transcode-task');
 
@@ -184,9 +170,7 @@ final class TranscodeTaskCrudControllerTest extends AbstractEasyAdminControllerT
     public function testFilterByTemplateGroup(): void
     {
         self::ensureKernelShutdown();
-        $client = self::createClientWithDatabase();
-        self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client = self::createAuthenticatedClient();
 
         $this->createTestTranscodeTask();
 

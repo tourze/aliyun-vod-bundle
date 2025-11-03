@@ -8,6 +8,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Tourze\AliyunVodBundle\Service\StatisticsService;
 
 /**
@@ -21,6 +22,7 @@ final class CleanupController extends AbstractController
     }
 
     #[Route(path: '/admin/statistics/cleanup', name: 'admin_statistics_cleanup', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function __invoke(Request $request): JsonResponse
     {
         try {

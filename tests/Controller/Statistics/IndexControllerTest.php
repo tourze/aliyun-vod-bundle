@@ -30,8 +30,6 @@ final class IndexControllerTest extends AbstractWebTestCase
     {
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
-        self::getClient($client);
-        self::getClient($client);
         $this->loginAsAdmin($client);
 
         try {
@@ -53,8 +51,6 @@ final class IndexControllerTest extends AbstractWebTestCase
     {
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
-        self::getClient($client);
-        self::getClient($client);
         $this->loginAsAdmin($client);
 
         $this->expectException(MethodNotAllowedHttpException::class);
@@ -65,7 +61,6 @@ final class IndexControllerTest extends AbstractWebTestCase
     {
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
-        self::getClient($client);
         $this->loginAsAdmin($client);
 
         $this->expectException(MethodNotAllowedHttpException::class);
@@ -76,7 +71,6 @@ final class IndexControllerTest extends AbstractWebTestCase
     {
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
-        self::getClient($client);
         $this->loginAsAdmin($client);
 
         $this->expectException(MethodNotAllowedHttpException::class);
@@ -87,7 +81,6 @@ final class IndexControllerTest extends AbstractWebTestCase
     {
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
-        self::getClient($client);
         $this->loginAsAdmin($client);
 
         $this->expectException(MethodNotAllowedHttpException::class);
@@ -98,7 +91,6 @@ final class IndexControllerTest extends AbstractWebTestCase
     {
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
-        self::getClient($client);
         $this->loginAsAdmin($client);
 
         try {
@@ -120,7 +112,6 @@ final class IndexControllerTest extends AbstractWebTestCase
     {
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
-        self::getClient($client);
         $this->loginAsAdmin($client);
 
         $this->expectException(MethodNotAllowedHttpException::class);

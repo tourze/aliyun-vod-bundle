@@ -23,6 +23,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Field\UrlField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\BooleanFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\EntityFilter;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Tourze\AliyunVodBundle\Entity\Video;
 
 /**
@@ -176,39 +178,59 @@ final class VideoCrudController extends AbstractCrudController
      * 播放视频
      */
     #[AdminAction(routeName: 'play_video', routePath: '/play-video')]
-    public function playVideo(): void
+    public function playVideo(): RedirectResponse|Response
     {
         // TODO: 实现播放视频功能
         $this->addFlash('info', '播放视频功能待实现');
+
+        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+            'action' => 'index',
+            'entity' => 'Video'
+        ]));
     }
 
     /**
      * 生成截图
      */
     #[AdminAction(routeName: 'generate_snapshot', routePath: '/generate-snapshot')]
-    public function generateSnapshot(): void
+    public function generateSnapshot(): RedirectResponse|Response
     {
         // TODO: 实现生成截图功能
         $this->addFlash('info', '生成截图功能待实现');
+
+        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+            'action' => 'index',
+            'entity' => 'Video'
+        ]));
     }
 
     /**
      * 提交转码
      */
     #[AdminAction(routeName: 'submit_transcode', routePath: '/submit-transcode')]
-    public function submitTranscode(): void
+    public function submitTranscode(): RedirectResponse|Response
     {
         // TODO: 实现提交转码功能
         $this->addFlash('info', '提交转码功能待实现');
+
+        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+            'action' => 'index',
+            'entity' => 'Video'
+        ]));
     }
 
     /**
      * 查看播放统计
      */
     #[AdminAction(routeName: 'view_video_stats', routePath: '/view-video-stats')]
-    public function viewStats(): void
+    public function viewStats(): RedirectResponse|Response
     {
         // TODO: 实现查看播放统计功能
         $this->addFlash('info', '播放统计功能待实现');
+
+        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+            'action' => 'index',
+            'entity' => 'Video'
+        ]));
     }
 }
