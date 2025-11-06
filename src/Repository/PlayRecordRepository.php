@@ -16,7 +16,7 @@ use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
  * @extends ServiceEntityRepository<PlayRecord>
  */
 #[AsRepository(entityClass: PlayRecord::class)]
-class PlayRecordRepository extends ServiceEntityRepository
+final class PlayRecordRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -64,17 +64,31 @@ class PlayRecordRepository extends ServiceEntityRepository
      */
     public function getPopularVideos(int $limit = 10): array
     {
-        return $this->createQueryBuilder('pr')
-            ->select('v.id, v.title, COUNT(pr.id) as playCount')
+        $query = $this->createQueryBuilder('pr')
+            ->select('v.id AS id')
+            ->addSelect('v.title AS title')
+            ->addSelect('COUNT(pr.id) AS playCount')
             ->join('pr.video', 'v')
             ->where('v.valid = :valid')
             ->setParameter('valid', true)
             ->groupBy('v.id')
             ->orderBy('playCount', 'DESC')
             ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult()
-        ;
+            ->getQuery();
+
+        /** @var list<array{id: string|int, title: string, playCount: string|int}> $rawResult 原始聚合结果 */
+        $rawResult = $query->getArrayResult();
+
+        return array_values(array_map(
+            static function (array $row): array {
+                return [
+                    'id' => (int) $row['id'],
+                    'title' => $row['title'],
+                    'playCount' => (int) $row['playCount'],
+                ];
+            },
+            $rawResult
+        ));
     }
 
     /**
@@ -84,15 +98,18 @@ class PlayRecordRepository extends ServiceEntityRepository
      */
     public function findByDateRange(\DateTime $startDate, \DateTime $endDate): array
     {
-        return $this->createQueryBuilder('pr')
+        $query = $this->createQueryBuilder('pr')
             ->where('pr.playTime >= :startDate')
             ->andWhere('pr.playTime <= :endDate')
             ->setParameter('startDate', $startDate)
             ->setParameter('endDate', $endDate)
             ->orderBy('pr.playTime', 'DESC')
-            ->getQuery()
-            ->getResult()
-        ;
+            ->getQuery();
+
+        /** @var list<PlayRecord> $records 查询结果为播放记录列表 */
+        $records = $query->getResult();
+
+        return $records;
     }
 
     public function save(PlayRecord $entity, bool $flush = true): void

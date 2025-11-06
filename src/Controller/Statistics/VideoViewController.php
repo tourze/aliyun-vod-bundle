@@ -35,6 +35,13 @@ final class VideoViewController extends AbstractController
                 ], 400);
             }
 
+            if (!is_numeric($videoId)) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'videoId参数必须是数字',
+                ], 400);
+            }
+
             $video = $this->videoRepository->find((int) $videoId);
             if (null === $video) {
                 return new JsonResponse([

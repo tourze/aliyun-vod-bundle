@@ -98,7 +98,10 @@ final class PlayRecordCrudController extends AbstractCrudController
     {
         $this->addFlash('info', '查看统计功能待实现');
 
-        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+        $context = $this->getContext();
+        $referer = $context?->getRequest()->headers->get('referer');
+
+        return $this->redirect($referer !== null && $referer !== '' ? $referer : $this->generateUrl('easyadmin', [
             'action' => 'index',
             'entity' => 'PlayRecord'
         ]));

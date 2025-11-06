@@ -43,6 +43,7 @@ final class VideoStatControllerTest extends AbstractWebTestCase
         $this->assertArrayHasKey('success', $content);
         $this->assertTrue($content['success']);
         $this->assertArrayHasKey('data', $content);
+        $this->assertIsArray($content['data']);
         $this->assertArrayHasKey('playStats', $content['data']);
         $this->assertArrayHasKey('completionRate', $content['data']);
     }

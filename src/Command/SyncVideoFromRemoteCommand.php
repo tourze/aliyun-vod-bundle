@@ -51,8 +51,8 @@ class SyncVideoFromRemoteCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $configName = $input->getOption('config');
-        $limit = (int) $input->getOption('limit');
+        $configName = $this->resolveStringOption($input, 'config');
+        $limit = $this->resolveIntOption($input, 'limit', 100);
         $force = (bool) $input->getOption('force');
         $dryRun = (bool) $input->getOption('dry-run');
 
@@ -198,7 +198,10 @@ class SyncVideoFromRemoteCommand extends Command
         bool $force,
         bool $dryRun,
     ): string {
-        $videoId = $remoteVideoData['videoId'];
+        $videoId = $remoteVideoData['videoId'] ?? '';
+        if (!is_string($videoId)) {
+            throw new \UnexpectedValueException('远程视频数据缺少有效的 videoId');
+        }
         $existingVideo = $this->videoRepository->findByVideoId($videoId);
 
         if (null !== $existingVideo && !$force) {
@@ -230,14 +233,14 @@ class SyncVideoFromRemoteCommand extends Command
     {
         $video = new Video();
         $video->setConfig($config);
-        $video->setVideoId($data['videoId']);
-        $video->setTitle($data['title']);
-        $video->setDescription($data['description'] ?? null);
-        $video->setDuration($data['duration'] ?? null);
-        $video->setSize($data['size'] ?? null);
-        $video->setStatus($data['status']);
-        $video->setCoverUrl($data['coverURL'] ?? null);
-        $video->setTags($data['tags'] ?? null);
+        $video->setVideoId($this->requireString($data, 'videoId'));
+        $video->setTitle($this->requireString($data, 'title'));
+        $video->setDescription($this->getStringOrNull($data, 'description'));
+        $video->setDuration($this->getIntOrNull($data, 'duration'));
+        $video->setSize($this->getIntOrNull($data, 'size'));
+        $video->setStatus($this->requireString($data, 'status'));
+        $video->setCoverUrl($this->getStringOrNull($data, 'coverURL'));
+        $video->setTags($this->getStringOrNull($data, 'tags'));
         $video->setValid(true);
 
         $this->entityManager->persist($video);
@@ -251,13 +254,13 @@ class SyncVideoFromRemoteCommand extends Command
      */
     private function updateVideoFromRemoteData(Video $video, array $data): void
     {
-        $video->setTitle($data['title']);
-        $video->setDescription($data['description'] ?? null);
-        $video->setDuration($data['duration'] ?? null);
-        $video->setSize($data['size'] ?? null);
-        $video->setStatus($data['status']);
-        $video->setCoverUrl($data['coverURL'] ?? null);
-        $video->setTags($data['tags'] ?? null);
+        $video->setTitle($this->requireString($data, 'title'));
+        $video->setDescription($this->getStringOrNull($data, 'description'));
+        $video->setDuration($this->getIntOrNull($data, 'duration'));
+        $video->setSize($this->getIntOrNull($data, 'size'));
+        $video->setStatus($this->requireString($data, 'status'));
+        $video->setCoverUrl($this->getStringOrNull($data, 'coverURL'));
+        $video->setTags($this->getStringOrNull($data, 'tags'));
 
         $this->entityManager->flush();
     }
@@ -293,5 +296,92 @@ class SyncVideoFromRemoteCommand extends Command
                 'tags' => '同步,演示',
             ],
         ];
+    }
+
+    /**
+     * 解析字符串类型的命令选项
+     */
+    private function resolveStringOption(InputInterface $input, string $name): ?string
+    {
+        $value = $input->getOption($name);
+        if (null === $value) {
+            return null;
+        }
+        if (!is_string($value)) {
+            throw new \InvalidArgumentException("选项 {$name} 必须为字符串");
+        }
+
+        return $value;
+    }
+
+    /**
+     * 解析整数类型的命令选项
+     */
+    private function resolveIntOption(InputInterface $input, string $name, int $default): int
+    {
+        $value = $input->getOption($name);
+        if (null === $value) {
+            return $default;
+        }
+        // 兼容测试环境中可能传递的整数类型
+        if (is_int($value)) {
+            return $value;
+        }
+        if (!is_string($value) || !ctype_digit($value)) {
+            throw new \InvalidArgumentException("选项 {$name} 必须为正整数");
+        }
+
+        return (int) $value;
+    }
+
+    /**
+     * 从数组中获取必需的字符串字段
+     *
+     * @param array<string, mixed> $data
+     */
+    private function requireString(array $data, string $key): string
+    {
+        $value = $data[$key] ?? null;
+        if (!is_string($value) || '' === $value) {
+            throw new \UnexpectedValueException("字段 {$key} 必须为非空字符串");
+        }
+
+        return $value;
+    }
+
+    /**
+     * 从数组中获取可选的字符串字段
+     *
+     * @param array<string, mixed> $data
+     */
+    private function getStringOrNull(array $data, string $key): ?string
+    {
+        $value = $data[$key] ?? null;
+        if (null === $value) {
+            return null;
+        }
+        if (!is_string($value)) {
+            throw new \UnexpectedValueException("字段 {$key} 期望字符串类型");
+        }
+
+        return $value;
+    }
+
+    /**
+     * 从数组中获取可选的整数字段
+     *
+     * @param array<string, mixed> $data
+     */
+    private function getIntOrNull(array $data, string $key): ?int
+    {
+        $value = $data[$key] ?? null;
+        if (null === $value) {
+            return null;
+        }
+        if (!is_int($value) && !is_numeric($value)) {
+            throw new \UnexpectedValueException("字段 {$key} 期望整数类型");
+        }
+
+        return (int) $value;
     }
 }

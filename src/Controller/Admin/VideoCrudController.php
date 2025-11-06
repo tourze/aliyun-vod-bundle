@@ -183,7 +183,10 @@ final class VideoCrudController extends AbstractCrudController
         // TODO: 实现播放视频功能
         $this->addFlash('info', '播放视频功能待实现');
 
-        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+        $context = $this->getContext();
+        $referer = $context?->getRequest()->headers->get('referer');
+
+        return $this->redirect($referer !== null && $referer !== '' ? $referer : $this->generateUrl('easyadmin', [
             'action' => 'index',
             'entity' => 'Video'
         ]));
@@ -198,7 +201,10 @@ final class VideoCrudController extends AbstractCrudController
         // TODO: 实现生成截图功能
         $this->addFlash('info', '生成截图功能待实现');
 
-        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+        $context = $this->getContext();
+        $referer = $context?->getRequest()->headers->get('referer');
+
+        return $this->redirect($referer !== null && $referer !== '' ? $referer : $this->generateUrl('easyadmin', [
             'action' => 'index',
             'entity' => 'Video'
         ]));
@@ -213,7 +219,10 @@ final class VideoCrudController extends AbstractCrudController
         // TODO: 实现提交转码功能
         $this->addFlash('info', '提交转码功能待实现');
 
-        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+        $context = $this->getContext();
+        $referer = $context?->getRequest()->headers->get('referer');
+
+        return $this->redirect($referer !== null && $referer !== '' ? $referer : $this->generateUrl('easyadmin', [
             'action' => 'index',
             'entity' => 'Video'
         ]));
@@ -228,7 +237,10 @@ final class VideoCrudController extends AbstractCrudController
         // TODO: 实现查看播放统计功能
         $this->addFlash('info', '播放统计功能待实现');
 
-        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+        $context = $this->getContext();
+        $referer = $context?->getRequest()->headers->get('referer');
+
+        return $this->redirect($referer !== null && $referer !== '' ? $referer : $this->generateUrl('easyadmin', [
             'action' => 'index',
             'entity' => 'Video'
         ]));

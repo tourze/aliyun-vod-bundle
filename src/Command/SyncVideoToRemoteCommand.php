@@ -48,9 +48,9 @@ class SyncVideoToRemoteCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $videoId = $input->getOption('video-id');
-        $status = $input->getOption('status');
-        $limit = (int) $input->getOption('limit');
+        $videoId = $this->resolveStringOption($input, 'video-id');
+        $status = $this->resolveStringOption($input, 'status');
+        $limit = $this->resolveIntOption($input, 'limit', 50);
         $dryRun = (bool) $input->getOption('dry-run');
 
         $io->title('本地视频数据同步到阿里云VOD');
@@ -183,5 +183,41 @@ class SyncVideoToRemoteCommand extends Command
             ]);
             throw $e;
         }
+    }
+
+    /**
+     * 解析字符串类型的命令选项
+     */
+    private function resolveStringOption(InputInterface $input, string $name): ?string
+    {
+        $value = $input->getOption($name);
+        if (null === $value) {
+            return null;
+        }
+        if (!is_string($value)) {
+            throw new \InvalidArgumentException("选项 {$name} 必须为字符串");
+        }
+
+        return $value;
+    }
+
+    /**
+     * 解析整数类型的命令选项
+     */
+    private function resolveIntOption(InputInterface $input, string $name, int $default): int
+    {
+        $value = $input->getOption($name);
+        if (null === $value) {
+            return $default;
+        }
+        // 兼容测试环境中可能传递的整数类型
+        if (is_int($value)) {
+            return $value;
+        }
+        if (!is_string($value) || !ctype_digit($value)) {
+            throw new \InvalidArgumentException("选项 {$name} 必须为正整数");
+        }
+
+        return (int) $value;
     }
 }

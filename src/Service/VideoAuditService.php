@@ -172,7 +172,12 @@ readonly class VideoAuditService
     {
         $jobInfo = $this->getAIMediaAuditJob($jobId, $config);
 
-        return $jobInfo['mediaAuditJob']['status'];
+        assert(isset($jobInfo['mediaAuditJob']) && is_array($jobInfo['mediaAuditJob']));
+        $mediaAuditJob = $jobInfo['mediaAuditJob'];
+
+        assert(isset($mediaAuditJob['status']) && is_string($mediaAuditJob['status']));
+
+        return $mediaAuditJob['status'];
     }
 
     /**
@@ -186,16 +191,33 @@ readonly class VideoAuditService
     {
         $formatted = [];
         foreach ($imageResult as $result) {
+            assert(is_object($result));
+
             $formatted[] = [
-                'suggestion' => $result->suggestion ?? '',
-                'label' => $result->label ?? '',
-                'type' => $result->type ?? '',
-                'url' => $result->url ?? '',
-                'result' => $result->result ?? [],
+                'suggestion' => $this->getStringProperty($result, 'suggestion'),
+                'label' => $this->getStringProperty($result, 'label'),
+                'type' => $this->getStringProperty($result, 'type'),
+                'url' => $this->getStringProperty($result, 'url'),
+                'result' => property_exists($result, 'result') ? $result->result : [],
             ];
         }
 
         return $formatted;
+    }
+
+    /**
+     * 安全获取对象的字符串属性
+     */
+    private function getStringProperty(object $obj, string $property): string
+    {
+        if (!property_exists($obj, $property)) {
+            return '';
+        }
+
+        $vars = get_object_vars($obj);
+        $value = $vars[$property] ?? null;
+
+        return is_string($value) ? $value : '';
     }
 
     /**
@@ -209,13 +231,13 @@ readonly class VideoAuditService
     {
         $formatted = [];
         foreach ($textResult as $result) {
+            assert(is_object($result));
+
             $formatted[] = [
-                'suggestion' => $result->suggestion ?? '',
-                'label' => $result->label ?? '',
-                'score' => $result->score ?? '',
-                'scene' => $result->scene ?? '',
-                'type' => $result->type ?? '',
-                'content' => $result->content ?? '',
+                'suggestion' => $this->getStringProperty($result, 'suggestion'),
+                'label' => $this->getStringProperty($result, 'label'),
+                'score' => $this->getStringProperty($result, 'score'),
+                'content' => $this->getStringProperty($result, 'content'),
             ];
         }
 
@@ -233,14 +255,16 @@ readonly class VideoAuditService
             return null;
         }
 
+        assert(is_object($videoResult));
+
         return [
-            'suggestion' => $videoResult->suggestion ?? '',
-            'label' => $videoResult->label ?? '',
-            'terrorismResult' => $videoResult->terrorismResult ?? null,
-            'pornResult' => $videoResult->pornResult ?? null,
-            'adResult' => $videoResult->adResult ?? null,
-            'liveResult' => $videoResult->liveResult ?? null,
-            'logoResult' => $videoResult->logoResult ?? null,
+            'suggestion' => $this->getStringProperty($videoResult, 'suggestion'),
+            'label' => $this->getStringProperty($videoResult, 'label'),
+            'terrorismResult' => property_exists($videoResult, 'terrorismResult') ? $videoResult->terrorismResult : null,
+            'pornResult' => property_exists($videoResult, 'pornResult') ? $videoResult->pornResult : null,
+            'adResult' => property_exists($videoResult, 'adResult') ? $videoResult->adResult : null,
+            'liveResult' => property_exists($videoResult, 'liveResult') ? $videoResult->liveResult : null,
+            'logoResult' => property_exists($videoResult, 'logoResult') ? $videoResult->logoResult : null,
         ];
     }
 
@@ -251,7 +275,12 @@ readonly class VideoAuditService
      */
     public function isAuditPassed(array $auditResult): bool
     {
-        $suggestion = $auditResult['mediaAuditResult']['suggestion'] ?? '';
+        if (!isset($auditResult['mediaAuditResult']) || !is_array($auditResult['mediaAuditResult'])) {
+            return false;
+        }
+
+        $mediaAuditResult = $auditResult['mediaAuditResult'];
+        $suggestion = $mediaAuditResult['suggestion'] ?? '';
 
         return 'pass' === $suggestion;
     }
@@ -263,7 +292,12 @@ readonly class VideoAuditService
      */
     public function needsManualReview(array $auditResult): bool
     {
-        $suggestion = $auditResult['mediaAuditResult']['suggestion'] ?? '';
+        if (!isset($auditResult['mediaAuditResult']) || !is_array($auditResult['mediaAuditResult'])) {
+            return false;
+        }
+
+        $mediaAuditResult = $auditResult['mediaAuditResult'];
+        $suggestion = $mediaAuditResult['suggestion'] ?? '';
 
         return 'review' === $suggestion;
     }
@@ -275,7 +309,12 @@ readonly class VideoAuditService
      */
     public function isAuditRejected(array $auditResult): bool
     {
-        $suggestion = $auditResult['mediaAuditResult']['suggestion'] ?? '';
+        if (!isset($auditResult['mediaAuditResult']) || !is_array($auditResult['mediaAuditResult'])) {
+            return false;
+        }
+
+        $mediaAuditResult = $auditResult['mediaAuditResult'];
+        $suggestion = $mediaAuditResult['suggestion'] ?? '';
 
         return 'block' === $suggestion;
     }

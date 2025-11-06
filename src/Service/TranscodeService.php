@@ -58,7 +58,25 @@ readonly class TranscodeService
     /**
      * 获取转码任务详情
      *
-     * @return array<string, mixed>
+     * @return array{
+     *     transcodeTaskId: string,
+     *     videoId: string,
+     *     taskStatus: string,
+     *     creationTime: string,
+     *     completeTime: string,
+     *     transcodeJobInfoList: list<array{
+     *         transcodeJobId: string,
+     *         transcodeJobStatus: string,
+     *         transcodeProgress: int,
+     *         priority: string,
+     *         creationTime: string,
+     *         completeTime: string,
+     *         errorCode: string,
+     *         errorMessage: string,
+     *         inputFileUrl: string,
+     *         outputFile: array<string, mixed>|null
+     *     }>
+     * }
      */
     public function getTranscodeTask(
         string $transcodeTaskId,
@@ -93,12 +111,29 @@ readonly class TranscodeService
      *
      * @param array<mixed> $jobInfoList
      *
-     * @return array<int, array<string, mixed>>
+     * @return list<array{
+     *     transcodeJobId: string,
+     *     transcodeJobStatus: string,
+     *     transcodeProgress: int,
+     *     priority: string,
+     *     creationTime: string,
+     *     completeTime: string,
+     *     errorCode: string,
+     *     errorMessage: string,
+     *     inputFileUrl: string,
+     *     outputFile: array<string, mixed>|null
+     * }>
      */
     private function formatTranscodeJobInfoList(array $jobInfoList): array
     {
         $formattedList = [];
         foreach ($jobInfoList as $jobInfo) {
+            // 防御性检查：确保 $jobInfo 是对象
+            if (!is_object($jobInfo)) {
+                continue;
+            }
+
+            /** @var object{transcodeJobId: string, transcodeJobStatus: string, transcodeProgress: int, priority: string, creationTime: string, completeTime: string, errorCode: string, errorMessage: string, inputFileUrl: string, outputFile?: mixed} $jobInfo */
             $formattedList[] = [
                 'transcodeJobId' => $jobInfo->transcodeJobId,
                 'transcodeJobStatus' => $jobInfo->transcodeJobStatus,
@@ -119,14 +154,24 @@ readonly class TranscodeService
     /**
      * 格式化输出文件信息
      *
-     * @return array<string, mixed>|null
+     * @return array{
+     *     outputFileUrl: string,
+     *     width: string,
+     *     height: string,
+     *     bitrate: string,
+     *     fps: string,
+     *     duration: string,
+     *     filesize: int,
+     *     format: string
+     * }|null
      */
     private function formatOutputFile(mixed $outputFile): ?array
     {
-        if (null === $outputFile || false === $outputFile) {
+        if (null === $outputFile || false === $outputFile || !is_object($outputFile)) {
             return null;
         }
 
+        /** @var object{outputFileUrl: string, width: string, height: string, bitrate: string, fps: string, duration: string, filesize: int, format: string} $outputFile */
         return [
             'outputFileUrl' => $outputFile->outputFileUrl,
             'width' => $outputFile->width,
@@ -154,7 +199,25 @@ readonly class TranscodeService
     /**
      * 获取转码进度
      *
-     * @return array<string, mixed>
+     * @return array{
+     *     transcodeTaskId: string,
+     *     taskStatus: string,
+     *     overallProgress: float|int,
+     *     completedJobs: int,
+     *     totalJobs: int,
+     *     jobDetails: list<array{
+     *         transcodeJobId: string,
+     *         transcodeJobStatus: string,
+     *         transcodeProgress: int,
+     *         priority: string,
+     *         creationTime: string,
+     *         completeTime: string,
+     *         errorCode: string,
+     *         errorMessage: string,
+     *         inputFileUrl: string,
+     *         outputFile: array<string, mixed>|null
+     *     }>
+     * }
      */
     public function getTranscodeProgress(
         string $transcodeTaskId,
@@ -162,16 +225,19 @@ readonly class TranscodeService
     ): array {
         $taskInfo = $this->getTranscodeTask($transcodeTaskId, $config);
 
-        $totalJobs = count($taskInfo['transcodeJobInfoList']);
+        /** @var list<array{transcodeJobId: string, transcodeJobStatus: string, transcodeProgress: int, priority: string, creationTime: string, completeTime: string, errorCode: string, errorMessage: string, inputFileUrl: string, outputFile: array<string, mixed>|null}> $jobInfoList */
+        $jobInfoList = $taskInfo['transcodeJobInfoList'];
+
+        $totalJobs = count($jobInfoList);
         $completedJobs = 0;
         $totalProgress = 0;
 
-        foreach ($taskInfo['transcodeJobInfoList'] as $job) {
+        foreach ($jobInfoList as $job) {
             if ('TranscodeSuccess' === $job['transcodeJobStatus']) {
                 ++$completedJobs;
                 $totalProgress += 100;
             } else {
-                $totalProgress += $job['transcodeProgress'] ?? 0;
+                $totalProgress += $job['transcodeProgress'];
             }
         }
 
@@ -183,7 +249,7 @@ readonly class TranscodeService
             'overallProgress' => $overallProgress,
             'completedJobs' => $completedJobs,
             'totalJobs' => $totalJobs,
-            'jobDetails' => $taskInfo['transcodeJobInfoList'],
+            'jobDetails' => $jobInfoList,
         ];
     }
 }

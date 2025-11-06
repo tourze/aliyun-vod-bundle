@@ -16,7 +16,7 @@ use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
  * @extends ServiceEntityRepository<TranscodeTask>
  */
 #[AsRepository(entityClass: TranscodeTask::class)]
-class TranscodeTaskRepository extends ServiceEntityRepository
+final class TranscodeTaskRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -77,12 +77,15 @@ class TranscodeTaskRepository extends ServiceEntityRepository
      */
     public function findCompletedTasks(): array
     {
-        return $this->createQueryBuilder('t')
+        $query = $this->createQueryBuilder('t')
             ->where('t.completedTime IS NOT NULL')
             ->orderBy('t.completedTime', 'DESC')
-            ->getQuery()
-            ->getResult()
-        ;
+            ->getQuery();
+
+        /** @var list<TranscodeTask> $tasks 查询结果为转码任务列表 */
+        $tasks = $query->getResult();
+
+        return $tasks;
     }
 
     public function save(TranscodeTask $entity, bool $flush = true): void

@@ -145,7 +145,10 @@ final class AliyunVodConfigCrudController extends AbstractCrudController
         // TODO: 实现测试连接功能
         $this->addFlash('success', '连接测试功能待实现');
 
-        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+        $context = $this->getContext();
+        $referer = $context?->getRequest()->headers->get('referer');
+
+        return $this->redirect($referer !== null && $referer !== '' ? $referer : $this->generateUrl('easyadmin', [
             'action' => 'index',
             'entity' => 'AliyunVodConfig'
         ]));
@@ -160,7 +163,10 @@ final class AliyunVodConfigCrudController extends AbstractCrudController
         // TODO: 实现设为默认配置功能
         $this->addFlash('success', '设为默认配置功能待实现');
 
-        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+        $context = $this->getContext();
+        $referer = $context?->getRequest()->headers->get('referer');
+
+        return $this->redirect($referer !== null && $referer !== '' ? $referer : $this->generateUrl('easyadmin', [
             'action' => 'index',
             'entity' => 'AliyunVodConfig'
         ]));

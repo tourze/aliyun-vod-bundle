@@ -144,62 +144,58 @@ final class AliyunVodConfigRepositoryTest extends AbstractRepositoryTestCase
 
     public function testAliyunVodConfigSaveWithFlush(): void
     {
-        $entityManager = $this->createMock(EntityManagerInterface::class);
-        $registry = $this->createMock(ManagerRegistry::class);
-        $registry->method('getManagerForClass')->willReturn($entityManager);
-
-        $repository = $this->createEntityManagerRepository($registry);
+        $repository = self::getService(AliyunVodConfigRepository::class);
         $config = $this->createTestConfig();
 
-        $entityManager->expects($this->once())->method('persist')->with($config);
-        $entityManager->expects($this->once())->method('flush');
-
         $repository->save($config);
+
+        // 验证实体已保存
+        $entityManager = self::getEntityManager();
+        $this->assertTrue($entityManager->contains($config));
     }
 
     public function testAliyunVodConfigSaveWithoutFlush(): void
     {
-        $entityManager = $this->createMock(EntityManagerInterface::class);
-        $registry = $this->createMock(ManagerRegistry::class);
-        $registry->method('getManagerForClass')->willReturn($entityManager);
-
-        $repository = $this->createEntityManagerRepository($registry);
+        $repository = self::getService(AliyunVodConfigRepository::class);
         $config = $this->createTestConfig();
 
-        $entityManager->expects($this->once())->method('persist')->with($config);
-        $entityManager->expects($this->never())->method('flush');
-
         $repository->save($config, false);
+
+        // 验证实体已持久化但未刷新
+        $entityManager = self::getEntityManager();
+        $this->assertTrue($entityManager->contains($config));
     }
 
     public function testAliyunVodConfigRemoveWithFlush(): void
     {
-        $entityManager = $this->createMock(EntityManagerInterface::class);
-        $registry = $this->createMock(ManagerRegistry::class);
-        $registry->method('getManagerForClass')->willReturn($entityManager);
-
-        $repository = $this->createEntityManagerRepository($registry);
+        $repository = self::getService(AliyunVodConfigRepository::class);
         $config = $this->createTestConfig();
 
-        $entityManager->expects($this->once())->method('remove')->with($config);
-        $entityManager->expects($this->once())->method('flush');
+        // 先保存实体
+        $repository->save($config);
 
+        // 然后删除
         $repository->remove($config);
+
+        // 验证实体已从管理器中移除
+        $entityManager = self::getEntityManager();
+        $this->assertFalse($entityManager->contains($config));
     }
 
     public function testAliyunVodConfigRemoveWithoutFlush(): void
     {
-        $entityManager = $this->createMock(EntityManagerInterface::class);
-        $registry = $this->createMock(ManagerRegistry::class);
-        $registry->method('getManagerForClass')->willReturn($entityManager);
-
-        $repository = $this->createEntityManagerRepository($registry);
+        $repository = self::getService(AliyunVodConfigRepository::class);
         $config = $this->createTestConfig();
 
-        $entityManager->expects($this->once())->method('remove')->with($config);
-        $entityManager->expects($this->never())->method('flush');
+        // 先保存实体
+        $repository->save($config);
 
+        // 然后删除但不刷新
         $repository->remove($config, false);
+
+        // 验证实体已标记为删除
+        $entityManager = self::getEntityManager();
+        $this->assertFalse($entityManager->contains($config));
     }
 
     /** @param array<int, AliyunVodConfig> $expectedResult */
@@ -387,10 +383,5 @@ final class AliyunVodConfigRepositoryTest extends AbstractRepositoryTestCase
     private function createMockRepository(): TestableRepository
     {
         return new TestableRepository($this->registry);
-    }
-
-    private function createEntityManagerRepository(ManagerRegistry $registry): TestableEntityManagerRepository
-    {
-        return new TestableEntityManagerRepository($registry);
     }
 }

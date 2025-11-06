@@ -294,8 +294,14 @@ final class VideoCrudControllerTest extends AbstractEasyAdminControllerTestCase
         $user = $this->loginAsAdmin($client);
 
         // 验证登录状态
-        $token = self::getContainer()->get('security.token_storage')->getToken();
-        if (!$token || !in_array('ROLE_ADMIN', $token->getRoleNames())) {
+        /** @var \Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface $tokenStorage */
+        $tokenStorage = self::getContainer()->get('security.token_storage');
+        $token = $tokenStorage->getToken();
+        if (null === $token) {
+            self::fail('用户登录后没有获得认证令牌');
+        }
+        $roleNames = $token->getRoleNames();
+        if (!is_array($roleNames) || !in_array('ROLE_ADMIN', $roleNames, true)) {
             self::fail('用户登录后没有获得 ROLE_ADMIN 角色');
         }
 

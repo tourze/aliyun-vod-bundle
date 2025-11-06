@@ -15,7 +15,7 @@ use Tourze\PHPUnitSymfonyKernelTest\Attribute\AsRepository;
  * @extends ServiceEntityRepository<AliyunVodConfig>
  */
 #[AsRepository(entityClass: AliyunVodConfig::class)]
-class AliyunVodConfigRepository extends ServiceEntityRepository
+final class AliyunVodConfigRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {

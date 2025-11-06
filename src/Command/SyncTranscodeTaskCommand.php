@@ -50,9 +50,9 @@ class SyncTranscodeTaskCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-        $taskId = $input->getOption('task-id');
-        $status = $input->getOption('status');
-        $limit = (int) $input->getOption('limit');
+        $taskId = $this->resolveStringOption($input, 'task-id');
+        $status = $this->resolveStringOption($input, 'status');
+        $limit = $this->resolveIntOption($input, 'limit', 50);
         $dryRun = (bool) $input->getOption('dry-run');
 
         $io->title('转码任务状态同步');
@@ -196,13 +196,21 @@ class SyncTranscodeTaskCommand extends Command
      */
     private function updateTaskFromRemote(TranscodeTask $task, array $remoteTaskInfo): void
     {
-        $task->setStatus($remoteTaskInfo['taskStatus']);
+        $taskStatus = $remoteTaskInfo['taskStatus'] ?? '';
+        if (!is_string($taskStatus)) {
+            throw new \UnexpectedValueException('API 响应中 taskStatus 字段类型错误');
+        }
+        $task->setStatus($taskStatus);
 
         $progressInfo = $this->transcodeService->getTranscodeProgress(
             $task->getTaskId(),
             $task->getVideo()->getConfig()
         );
-        $task->setProgress((int) $progressInfo['overallProgress']);
+        $overallProgress = $progressInfo['overallProgress'] ?? 0;
+        if (!is_numeric($overallProgress)) {
+            throw new \UnexpectedValueException('API 响应中 overallProgress 字段类型错误');
+        }
+        $task->setProgress((int) $overallProgress);
 
         $this->handleTaskCompletion($task, $remoteTaskInfo, $progressInfo);
     }
@@ -234,10 +242,21 @@ class SyncTranscodeTaskCommand extends Command
     private function handleTranscodeFailure(TranscodeTask $task, array $progressInfo): void
     {
         $jobDetails = $progressInfo['jobDetails'] ?? [];
+        if (!is_array($jobDetails)) {
+            return;
+        }
+
+        /** @var array<int, array<string, mixed>> $jobDetails */
         foreach ($jobDetails as $job) {
-            if ('TranscodeFail' === $job['transcodeJobStatus']) {
-                $task->setErrorCode($job['errorCode'] ?? 'Unknown');
-                $task->setErrorMessage($job['errorMessage'] ?? '转码失败');
+            if (!is_array($job)) {
+                continue;
+            }
+            $jobStatus = $job['transcodeJobStatus'] ?? '';
+            if ('TranscodeFail' === $jobStatus) {
+                $errorCode = $job['errorCode'] ?? 'Unknown';
+                $errorMessage = $job['errorMessage'] ?? '转码失败';
+                $task->setErrorCode(is_string($errorCode) ? $errorCode : 'Unknown');
+                $task->setErrorMessage(is_string($errorMessage) ? $errorMessage : '转码失败');
                 break;
             }
         }
@@ -263,5 +282,41 @@ class SyncTranscodeTaskCommand extends Command
             'error' => $e->getMessage(),
             'exception' => $e,
         ]);
+    }
+
+    /**
+     * 解析字符串类型的命令选项
+     */
+    private function resolveStringOption(InputInterface $input, string $name): ?string
+    {
+        $value = $input->getOption($name);
+        if (null === $value) {
+            return null;
+        }
+        if (!is_string($value)) {
+            throw new \InvalidArgumentException("选项 {$name} 必须为字符串");
+        }
+
+        return $value;
+    }
+
+    /**
+     * 解析整数类型的命令选项
+     */
+    private function resolveIntOption(InputInterface $input, string $name, int $default): int
+    {
+        $value = $input->getOption($name);
+        if (null === $value) {
+            return $default;
+        }
+        // 兼容测试环境中可能传递的整数类型
+        if (is_int($value)) {
+            return $value;
+        }
+        if (!is_string($value) || !ctype_digit($value)) {
+            throw new \InvalidArgumentException("选项 {$name} 必须为正整数");
+        }
+
+        return (int) $value;
     }
 }

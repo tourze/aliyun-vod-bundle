@@ -100,7 +100,10 @@ final class TranscodeTaskCrudController extends AbstractCrudController
     {
         $this->addFlash('info', '刷新状态功能待实现');
 
-        return $this->redirect($this->getContext()->getRequest()->headers->get('referer') ?: $this->generateUrl('easyadmin', [
+        $context = $this->getContext();
+        $referer = $context?->getRequest()->headers->get('referer');
+
+        return $this->redirect($referer !== null && $referer !== '' ? $referer : $this->generateUrl('easyadmin', [
             'action' => 'index',
             'entity' => 'TranscodeTask'
         ]));

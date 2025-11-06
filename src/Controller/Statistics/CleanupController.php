@@ -22,7 +22,7 @@ final class CleanupController extends AbstractController
     }
 
     #[Route(path: '/admin/statistics/cleanup', name: 'admin_statistics_cleanup', methods: ['POST'])]
-    #[IsGranted('ROLE_ADMIN')]
+    #[IsGranted(attribute: 'ROLE_ADMIN')]
     public function __invoke(Request $request): JsonResponse
     {
         try {

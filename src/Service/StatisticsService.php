@@ -257,6 +257,9 @@ readonly class StatisticsService
             ->setParameter('expireDate', $expireDate)
         ;
 
-        return $qb->getQuery()->execute();
+        /** @var int $affected DELETE 查询返回受影响的行数 */
+        $affected = $qb->getQuery()->execute();
+
+        return $affected;
     }
 }
