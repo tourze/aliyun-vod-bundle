@@ -60,8 +60,7 @@ readonly class VideoSnapshotService
         return [
             'requestId' => $response->body->requestId,
             'snapshotJob' => [
-                /* @phpstan-ignore-next-line */
-                'jobId' => $response->body->snapshotJob->jobId ?? null,
+                'jobId' => $response->body->snapshotJob->jobId,
             ],
         ];
     }
@@ -95,23 +94,18 @@ readonly class VideoSnapshotService
         $response = $client->listSnapshots($request);
 
         $snapshots = [];
-        /* @phpstan-ignore-next-line */
-        if (isset($response->body->mediaSnapshot->snapshots)) {
-            foreach ($response->body->mediaSnapshot->snapshots->snapshot as $snapshot) {
-                $snapshots[] = [
-                    'url' => $snapshot->url,
-                    'index' => $snapshot->index,
-                ];
-            }
+              foreach ($response->body->mediaSnapshot->snapshots->snapshot as $snapshot) {
+            $snapshots[] = [
+                'url' => $snapshot->url,
+                'index' => $snapshot->index,
+            ];
         }
 
         return [
             'requestId' => $response->body->requestId,
             'mediaSnapshot' => [
-                /* @phpstan-ignore-next-line */
-                'total' => $response->body->mediaSnapshot->total ?? 0,
-                /* @phpstan-ignore-next-line */
-                'regular' => $response->body->mediaSnapshot->regular ?? '',
+                'total' => $response->body->mediaSnapshot->total,
+                'regular' => $response->body->mediaSnapshot->regular,
                 'snapshots' => $snapshots,
             ],
         ];

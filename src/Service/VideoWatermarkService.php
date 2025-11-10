@@ -145,17 +145,14 @@ readonly class VideoWatermarkService
         $response = $client->listWatermark($request);
 
         $watermarks = [];
-        /* @phpstan-ignore-next-line */
-        if (isset($response->body->watermarkInfos)) {
             foreach ($response->body->watermarkInfos as $watermark) {
-                $watermarks[] = [
-                    'watermarkId' => $watermark->watermarkId,
-                    'name' => $watermark->name,
-                    'type' => $watermark->type,
-                    'isDefault' => $watermark->isDefault,
-                    'creationTime' => $watermark->creationTime,
-                ];
-            }
+            $watermarks[] = [
+                'watermarkId' => $watermark->watermarkId,
+                'name' => $watermark->name,
+                'type' => $watermark->type,
+                'isDefault' => $watermark->isDefault,
+                'creationTime' => $watermark->creationTime,
+            ];
         }
 
         return [
@@ -193,8 +190,7 @@ readonly class VideoWatermarkService
                 'name' => $response->body->watermarkInfo->name,
                 'type' => $response->body->watermarkInfo->type,
                 'watermarkConfig' => $response->body->watermarkInfo->watermarkConfig,
-                /* @phpstan-ignore-next-line */
-                'fileUrl' => $response->body->watermarkInfo->fileUrl ?? null,
+                'fileUrl' => $response->body->watermarkInfo->fileUrl,
                 'isDefault' => $response->body->watermarkInfo->isDefault,
                 'creationTime' => $response->body->watermarkInfo->creationTime,
             ],

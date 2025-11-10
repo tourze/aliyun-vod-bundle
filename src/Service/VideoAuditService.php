@@ -84,15 +84,11 @@ readonly class VideoAuditService
                 'mediaId' => $response->body->mediaAuditJob->mediaId,
                 'type' => $response->body->mediaAuditJob->type,
                 'status' => $response->body->mediaAuditJob->status,
-                /* @phpstan-ignore-next-line */
-                'code' => $response->body->mediaAuditJob->code ?? null,
-                /* @phpstan-ignore-next-line */
-                'message' => $response->body->mediaAuditJob->message ?? null,
+                'code' => $response->body->mediaAuditJob->code,
+                'message' => $response->body->mediaAuditJob->message,
                 'creationTime' => $response->body->mediaAuditJob->creationTime,
-                /* @phpstan-ignore-next-line */
-                'completeTime' => $response->body->mediaAuditJob->completeTime ?? null,
-                /* @phpstan-ignore-next-line */
-                'data' => $response->body->mediaAuditJob->data ?? null,
+                'completeTime' => $response->body->mediaAuditJob->completeTime,
+                'data' => $response->body->mediaAuditJob->data,
             ],
         ];
     }
@@ -122,18 +118,12 @@ readonly class VideoAuditService
         return [
             'requestId' => $response->body->requestId,
             'mediaAuditResult' => [
-                /* @phpstan-ignore-next-line */
-                'abnormalModules' => $response->body->mediaAuditResult->abnormalModules ?? '',
-                /* @phpstan-ignore-next-line */
-                'label' => $response->body->mediaAuditResult->label ?? '',
-                /* @phpstan-ignore-next-line */
-                'suggestion' => $response->body->mediaAuditResult->suggestion ?? '',
-                /* @phpstan-ignore-next-line */
-                'imageResult' => $this->formatImageResult($response->body->mediaAuditResult->imageResult ?? []),
-                /* @phpstan-ignore-next-line */
-                'textResult' => $this->formatTextResult($response->body->mediaAuditResult->textResult ?? []),
-                /* @phpstan-ignore-next-line */
-                'videoResult' => $this->formatVideoResult($response->body->mediaAuditResult->videoResult ?? null),
+                'abnormalModules' => $response->body->mediaAuditResult->abnormalModules,
+                'label' => $response->body->mediaAuditResult->label,
+                'suggestion' => $response->body->mediaAuditResult->suggestion,
+                'imageResult' => $this->formatImageResult($response->body->mediaAuditResult->imageResult),
+                'textResult' => $this->formatTextResult($response->body->mediaAuditResult->textResult),
+                'videoResult' => $this->formatVideoResult($response->body->mediaAuditResult->videoResult),
             ],
         ];
     }
