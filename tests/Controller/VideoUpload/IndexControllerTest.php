@@ -10,6 +10,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\User\InMemoryUser;
 use Tourze\AliyunVodBundle\Controller\VideoUpload\IndexController;
 use Tourze\PHPUnitSymfonyWebTest\AbstractWebTestCase;
 use Twig\Error\RuntimeError;
@@ -26,7 +27,7 @@ final class IndexControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         try {
             $client->request('GET', '/admin/video-upload');
@@ -47,7 +48,7 @@ final class IndexControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('POST', '/admin/video-upload');
@@ -58,7 +59,7 @@ final class IndexControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('PUT', '/admin/video-upload');
@@ -69,7 +70,7 @@ final class IndexControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('DELETE', '/admin/video-upload');
@@ -80,7 +81,7 @@ final class IndexControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('PATCH', '/admin/video-upload');
@@ -91,7 +92,7 @@ final class IndexControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         try {
             $client->request('HEAD', '/admin/video-upload');
@@ -113,7 +114,7 @@ final class IndexControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('OPTIONS', '/admin/video-upload');
@@ -135,7 +136,7 @@ final class IndexControllerTest extends AbstractWebTestCase
     {
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         // @phpstan-ignore-next-line

@@ -10,6 +10,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\User\InMemoryUser;
 use Tourze\AliyunVodBundle\Controller\Statistics\VideoPlayController;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
 use Tourze\AliyunVodBundle\Entity\Video;
@@ -27,7 +28,7 @@ final class VideoPlayControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $video = $this->createTestVideo();
 
@@ -49,7 +50,7 @@ final class VideoPlayControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $video = $this->createTestVideo();
 
@@ -71,7 +72,7 @@ final class VideoPlayControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $client->request('GET', '/admin/statistics/video-play/99999');
 
@@ -84,7 +85,7 @@ final class VideoPlayControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $video = $this->createTestVideo();
 
@@ -102,7 +103,7 @@ final class VideoPlayControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $video = $this->createTestVideo();
 
@@ -120,7 +121,7 @@ final class VideoPlayControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $video = $this->createTestVideo();
 
@@ -138,7 +139,7 @@ final class VideoPlayControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $video = $this->createTestVideo();
 
@@ -153,7 +154,7 @@ final class VideoPlayControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $video = $this->createTestVideo();
 
@@ -227,7 +228,7 @@ final class VideoPlayControllerTest extends AbstractWebTestCase
     {
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $video = $this->createTestVideo();
 

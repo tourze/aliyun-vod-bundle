@@ -10,6 +10,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\User\InMemoryUser;
 use Tourze\AliyunVodBundle\Controller\VideoUpload\AuthController;
 use Tourze\PHPUnitSymfonyWebTest\AbstractWebTestCase;
 
@@ -25,7 +26,9 @@ final class AuthControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+
+        // 使用更可靠的登录方法，直接创建内存管理员用户
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $client->request('POST', '/admin/video-upload/auth', [
             'title' => 'Test Video',
@@ -50,7 +53,7 @@ final class AuthControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $client->request('POST', '/admin/video-upload/auth');
 
@@ -61,7 +64,7 @@ final class AuthControllerTest extends AbstractWebTestCase
     public function testGetMethodNotAllowed(): void
     {
         $client = self::createClientWithDatabase();
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('GET', '/admin/video-upload/auth');
@@ -70,7 +73,7 @@ final class AuthControllerTest extends AbstractWebTestCase
     public function testPutMethodNotAllowed(): void
     {
         $client = self::createClientWithDatabase();
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('PUT', '/admin/video-upload/auth');
@@ -79,7 +82,7 @@ final class AuthControllerTest extends AbstractWebTestCase
     public function testDeleteMethodNotAllowed(): void
     {
         $client = self::createClientWithDatabase();
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('DELETE', '/admin/video-upload/auth');
@@ -88,7 +91,7 @@ final class AuthControllerTest extends AbstractWebTestCase
     public function testPatchMethodNotAllowed(): void
     {
         $client = self::createClientWithDatabase();
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('PATCH', '/admin/video-upload/auth');
@@ -97,7 +100,7 @@ final class AuthControllerTest extends AbstractWebTestCase
     public function testHeadMethod(): void
     {
         $client = self::createClientWithDatabase();
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('HEAD', '/admin/video-upload/auth');
@@ -106,7 +109,7 @@ final class AuthControllerTest extends AbstractWebTestCase
     public function testOptionsMethod(): void
     {
         $client = self::createClientWithDatabase();
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('OPTIONS', '/admin/video-upload/auth');
@@ -128,7 +131,7 @@ final class AuthControllerTest extends AbstractWebTestCase
     public function testMethodNotAllowed(string $method): void
     {
         $client = self::createClientWithDatabase();
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         // @phpstan-ignore-next-line

@@ -8,6 +8,7 @@ use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\User\InMemoryUser;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Tourze\AliyunVodBundle\Controller\Admin\VideoCrudController;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
@@ -98,7 +99,7 @@ final class VideoCrudControllerTest extends AbstractEasyAdminControllerTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $client->request('GET', '/admin/aliyun-vod/video');
 
@@ -111,7 +112,7 @@ final class VideoCrudControllerTest extends AbstractEasyAdminControllerTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $client->request('GET', '/admin/aliyun-vod/video?crudAction=new');
 
@@ -166,7 +167,7 @@ final class VideoCrudControllerTest extends AbstractEasyAdminControllerTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $client->request('GET', '/admin/aliyun-vod/video?crudAction=new');
 
@@ -179,7 +180,7 @@ final class VideoCrudControllerTest extends AbstractEasyAdminControllerTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $video = $this->createTestVideo();
 
@@ -194,7 +195,7 @@ final class VideoCrudControllerTest extends AbstractEasyAdminControllerTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $video = $this->createTestVideo();
 
@@ -209,7 +210,7 @@ final class VideoCrudControllerTest extends AbstractEasyAdminControllerTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $video = $this->createTestVideo();
 
@@ -225,7 +226,7 @@ final class VideoCrudControllerTest extends AbstractEasyAdminControllerTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $video = $this->createTestVideo();
 
@@ -241,7 +242,7 @@ final class VideoCrudControllerTest extends AbstractEasyAdminControllerTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $video = $this->createTestVideo();
 
@@ -291,7 +292,7 @@ final class VideoCrudControllerTest extends AbstractEasyAdminControllerTestCase
         self::getClient($client);
 
         // 使用自定义登录方法确保角色正确设置
-        $user = $this->loginAsAdmin($client);
+        $user = $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         // 验证登录状态
         /** @var \Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface $tokenStorage */

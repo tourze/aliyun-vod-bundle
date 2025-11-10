@@ -10,6 +10,7 @@ use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\User\InMemoryUser;
 use Tourze\AliyunVodBundle\Controller\Statistics\PopularController;
 use Tourze\PHPUnitSymfonyWebTest\AbstractWebTestCase;
 
@@ -30,7 +31,7 @@ final class PopularControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $client->request('GET', '/admin/statistics/popular');
 
@@ -49,7 +50,7 @@ final class PopularControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $client->request('GET', '/admin/statistics/popular?limit=20');
 
@@ -68,7 +69,7 @@ final class PopularControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('POST', '/admin/statistics/popular');
@@ -79,7 +80,7 @@ final class PopularControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('PUT', '/admin/statistics/popular');
@@ -90,7 +91,7 @@ final class PopularControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('DELETE', '/admin/statistics/popular');
@@ -101,7 +102,7 @@ final class PopularControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('PATCH', '/admin/statistics/popular');
@@ -112,7 +113,7 @@ final class PopularControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $client->request('HEAD', '/admin/statistics/popular');
 
@@ -125,7 +126,7 @@ final class PopularControllerTest extends AbstractWebTestCase
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         $client->request('OPTIONS', '/admin/statistics/popular');
@@ -147,7 +148,7 @@ final class PopularControllerTest extends AbstractWebTestCase
     {
         $client = self::createClientWithDatabase();
         self::getClient($client);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
         // @phpstan-ignore-next-line

@@ -7,6 +7,7 @@ namespace Tourze\AliyunVodBundle\Controller\Statistics;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Tourze\AliyunVodBundle\Service\StatisticsService;
 
 /**
@@ -20,6 +21,7 @@ final class IndexController extends AbstractController
     }
 
     #[Route(path: '/admin/statistics', name: 'admin_statistics_index', methods: ['GET'])]
+    #[IsGranted(attribute: 'ROLE_ADMIN')]
     public function __invoke(): Response
     {
         $realTimeStats = $this->statisticsService->getRealTimeStats();

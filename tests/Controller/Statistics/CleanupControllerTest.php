@@ -7,9 +7,9 @@ namespace Tourze\AliyunVodBundle\Tests\Controller\Statistics;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
-use PHPUnit\Framework\Attributes\Test;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Symfony\Component\Security\Core\User\InMemoryUser;
 use Tourze\AliyunVodBundle\Controller\Statistics\CleanupController;
 use Tourze\PHPUnitSymfonyWebTest\AbstractWebTestCase;
 
@@ -30,7 +30,7 @@ final class CleanupControllerTest extends AbstractWebTestCase
     {
         self::ensureKernelShutdown();
         $client = self::createClientWithDatabase();
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $client->request('POST', '/admin/statistics/cleanup');
 
@@ -71,7 +71,7 @@ final class CleanupControllerTest extends AbstractWebTestCase
         $client = self::createClientWithDatabase();
         self::getClient($client);
         $client->catchExceptions(false);
-        $this->loginAsAdmin($client);
+        $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
 
