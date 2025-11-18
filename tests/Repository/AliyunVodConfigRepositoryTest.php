@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace Tourze\AliyunVodBundle\Tests\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Persistence\ManagerRegistry;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
-use PHPUnit\Framework\Attributes\TestWith;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
 use Tourze\AliyunVodBundle\Repository\AliyunVodConfigRepository;
 use Tourze\PHPUnitSymfonyKernelTest\AbstractRepositoryTestCase;
@@ -22,11 +20,10 @@ use Tourze\PHPUnitSymfonyKernelTest\AbstractRepositoryTestCase;
 #[RunTestsInSeparateProcesses]
 final class AliyunVodConfigRepositoryTest extends AbstractRepositoryTestCase
 {
-    private ManagerRegistry $registry;
-
     protected function onSetUp(): void
     {
-        $this->registry = $this->createMock(ManagerRegistry::class);
+        // Repository test setup - ensure clean state before each test
+        self::getEntityManager()->clear();
     }
 
     public function testRepositoryConstruction(): void
@@ -48,18 +45,24 @@ final class AliyunVodConfigRepositoryTest extends AbstractRepositoryTestCase
 
     public function testFindDefaultConfig(): void
     {
-        $mockRepo = $this->createMockRepository();
+        $repository = $this->getRepository();
 
-        // Test null case
-        $mockRepo->setFindOneByResult(null);
-        $result = $mockRepo->findDefaultConfig();
+        // 清空现有数据
+        foreach ($repository->findAll() as $config) {
+            self::getEntityManager()->remove($config);
+        }
+        self::getEntityManager()->flush();
+
+        // Test null case - no default config
+        $result = $repository->findDefaultConfig();
         $this->assertNull($result);
 
-        // Test valid config case
+        // Create valid default config
         $config = $this->createTestConfig(['name' => '默认配置', 'isDefault' => true, 'valid' => true]);
-        $mockRepo->setFindOneByResult($config);
-        $result = $mockRepo->findDefaultConfig();
+        self::getEntityManager()->persist($config);
+        self::getEntityManager()->flush();
 
+        $result = $repository->findDefaultConfig();
         $this->assertInstanceOf(AliyunVodConfig::class, $result);
         $this->assertTrue($result->isDefault());
         $this->assertTrue($result->getValid());
@@ -68,44 +71,65 @@ final class AliyunVodConfigRepositoryTest extends AbstractRepositoryTestCase
 
     public function testFindDefaultConfigWithInvalidConfig(): void
     {
-        $mockRepo = $this->createMockRepository();
+        $repository = $this->getRepository();
 
-        // Test with invalid config - should return null
+        // 清空现有数据
+        foreach ($repository->findAll() as $config) {
+            self::getEntityManager()->remove($config);
+        }
+        self::getEntityManager()->flush();
+
+        // Create invalid config - should not be returned
         $invalidConfig = $this->createTestConfig(['name' => '无效配置', 'isDefault' => true, 'valid' => false]);
-        $mockRepo->setFindOneByResult(null); // Repository should not return invalid configs
-        $result = $mockRepo->findDefaultConfig();
-        $this->assertNull($result);
+        self::getEntityManager()->persist($invalidConfig);
+        self::getEntityManager()->flush();
+
+        $result = $repository->findDefaultConfig();
+        $this->assertNull($result, 'Repository should not return invalid configs');
     }
 
     public function testFindDefaultConfigWithNonDefaultConfig(): void
     {
-        $mockRepo = $this->createMockRepository();
+        $repository = $this->getRepository();
 
-        // Test with non-default config - should return null
+        // 清空现有数据
+        foreach ($repository->findAll() as $config) {
+            self::getEntityManager()->remove($config);
+        }
+        self::getEntityManager()->flush();
+
+        // Create non-default config - should not be returned
         $nonDefaultConfig = $this->createTestConfig(['name' => '非默认配置', 'isDefault' => false, 'valid' => true]);
-        $mockRepo->setFindOneByResult(null); // Repository should not return non-default configs
-        $result = $mockRepo->findDefaultConfig();
-        $this->assertNull($result);
+        self::getEntityManager()->persist($nonDefaultConfig);
+        self::getEntityManager()->flush();
+
+        $result = $repository->findDefaultConfig();
+        $this->assertNull($result, 'Repository should not return non-default configs');
     }
 
     public function testFindActiveConfigs(): void
     {
-        $mockRepo = $this->createMockRepository();
+        $repository = $this->getRepository();
+
+        // 清空现有数据
+        foreach ($repository->findAll() as $config) {
+            self::getEntityManager()->remove($config);
+        }
+        self::getEntityManager()->flush();
 
         // Test empty result
-        $mockRepo->setFindByResult([]);
-        $result = $mockRepo->findActiveConfigs();
+        $result = $repository->findActiveConfigs();
         $this->assertEmpty($result);
         $this->assertIsArray($result);
 
-        // Test with configs
-        $configs = [
-            $this->createTestConfig(['name' => 'A配置', 'isDefault' => true, 'valid' => true]),
-            $this->createTestConfig(['name' => 'B配置', 'isDefault' => false, 'valid' => true]),
-        ];
-        $mockRepo->setFindByResult($configs);
-        $result = $mockRepo->findActiveConfigs();
+        // Create test configs
+        $configA = $this->createTestConfig(['name' => 'A配置', 'isDefault' => true, 'valid' => true]);
+        $configB = $this->createTestConfig(['name' => 'B配置', 'isDefault' => false, 'valid' => true]);
+        self::getEntityManager()->persist($configA);
+        self::getEntityManager()->persist($configB);
+        self::getEntityManager()->flush();
 
+        $result = $repository->findActiveConfigs();
         $this->assertCount(2, $result);
         $this->assertTrue($result[0]->getIsDefault());
         $this->assertFalse($result[1]->isDefault());
@@ -114,36 +138,54 @@ final class AliyunVodConfigRepositoryTest extends AbstractRepositoryTestCase
 
     public function testFindActiveConfigsOrdering(): void
     {
-        $mockRepo = $this->createMockRepository();
+        $repository = $this->getRepository();
 
-        // Test ordering (isDefault DESC, name ASC)
-        $configs = [
-            $this->createTestConfig(['name' => 'B配置', 'isDefault' => true, 'valid' => true]),
-            $this->createTestConfig(['name' => 'A配置', 'isDefault' => false, 'valid' => true]),
-            $this->createTestConfig(['name' => 'C配置', 'isDefault' => false, 'valid' => true]),
-        ];
-        $mockRepo->setFindByResult($configs);
-        $result = $mockRepo->findActiveConfigs();
+        // 清空现有数据
+        foreach ($repository->findAll() as $config) {
+            self::getEntityManager()->remove($config);
+        }
+        self::getEntityManager()->flush();
 
+        // Create configs with specific ordering requirements (isDefault DESC, name ASC)
+        $configB = $this->createTestConfig(['name' => 'B配置', 'isDefault' => true, 'valid' => true]);
+        $configA = $this->createTestConfig(['name' => 'A配置', 'isDefault' => false, 'valid' => true]);
+        $configC = $this->createTestConfig(['name' => 'C配置', 'isDefault' => false, 'valid' => true]);
+        self::getEntityManager()->persist($configB);
+        self::getEntityManager()->persist($configA);
+        self::getEntityManager()->persist($configC);
+        self::getEntityManager()->flush();
+
+        $result = $repository->findActiveConfigs();
         $this->assertCount(3, $result);
         // First should be default config
         $this->assertTrue($result[0]->getIsDefault());
         $this->assertEquals('B配置', $result[0]->getName());
+        // Then by name ASC
+        $this->assertEquals('A配置', $result[1]->getName());
+        $this->assertEquals('C配置', $result[2]->getName());
     }
 
     public function testFindActiveConfigsOnlyValidConfigs(): void
     {
-        $mockRepo = $this->createMockRepository();
+        $repository = $this->getRepository();
 
-        // Only valid configs should be returned
-        $validConfigs = [
-            $this->createTestConfig(['name' => '有效配置1', 'isDefault' => true, 'valid' => true]),
-            $this->createTestConfig(['name' => '有效配置2', 'isDefault' => false, 'valid' => true]),
-        ];
-        $mockRepo->setFindByResult($validConfigs);
-        $result = $mockRepo->findActiveConfigs();
+        // 清空现有数据
+        foreach ($repository->findAll() as $config) {
+            self::getEntityManager()->remove($config);
+        }
+        self::getEntityManager()->flush();
 
-        $this->assertCount(2, $result);
+        // Create valid and invalid configs
+        $validConfig1 = $this->createTestConfig(['name' => '有效配置1', 'isDefault' => true, 'valid' => true]);
+        $validConfig2 = $this->createTestConfig(['name' => '有效配置2', 'isDefault' => false, 'valid' => true]);
+        $invalidConfig = $this->createTestConfig(['name' => '无效配置', 'isDefault' => false, 'valid' => false]);
+        self::getEntityManager()->persist($validConfig1);
+        self::getEntityManager()->persist($validConfig2);
+        self::getEntityManager()->persist($invalidConfig);
+        self::getEntityManager()->flush();
+
+        $result = $repository->findActiveConfigs();
+        $this->assertCount(2, $result, 'Should only return valid configs');
         foreach ($result as $config) {
             $this->assertTrue($config->getValid());
         }
@@ -237,91 +279,56 @@ final class AliyunVodConfigRepositoryTest extends AbstractRepositoryTestCase
         }
     }
 
-    /** @param array<int, AliyunVodConfig> $expectedResult */
-    #[TestWith(['templateGroupId', []])]
-    #[TestWith(['storageLocation', []])]
-    #[TestWith(['callbackUrl', []])]
-    #[TestWith(['regionId', []])]
-    public function testFindByNullFields(string $field, array $expectedResult): void
+    /**
+     * 测试可空字段的查询
+     * 注意：基础的 findBy/count/findOneBy 功能已在 AbstractRepositoryTestCase 中覆盖
+     */
+    public function testFindByNullableFields(): void
     {
-        $mockRepo = $this->createMockRepository();
-        $mockRepo->setFindByResult($expectedResult);
+        $repository = $this->getRepository();
 
-        $result = $mockRepo->findBy([$field => null]);
-        $this->assertEquals($expectedResult, $result);
-    }
+        // 清空现有数据
+        foreach ($repository->findAll() as $config) {
+            self::getEntityManager()->remove($config);
+        }
+        self::getEntityManager()->flush();
 
-    #[TestWith(['templateGroupId', 3])]
-    #[TestWith(['storageLocation', 2])]
-    #[TestWith(['callbackUrl', 1])]
-    #[TestWith(['regionId', 5])]
-    public function testCountByNullFields(string $field, int $expectedCount): void
-    {
-        $mockRepo = $this->createMockRepository();
-        $mockRepo->setCountResult($expectedCount);
+        // Create config with null optional fields
+        $config = $this->createTestConfig([
+            'name' => '测试配置',
+            'templateGroupId' => null,
+            'storageLocation' => null,
+        ]);
+        self::getEntityManager()->persist($config);
+        self::getEntityManager()->flush();
 
-        $result = $mockRepo->count([$field => null]);
-        $this->assertEquals($expectedCount, $result);
+        // Test querying by null values
+        $result = $repository->findBy(['templateGroupId' => null]);
+        $this->assertCount(1, $result);
+        $this->assertEquals('测试配置', $result[0]->getName());
     }
 
     public function testFindByRegionId(): void
     {
-        $mockRepo = $this->createMockRepository();
+        $repository = $this->getRepository();
+
+        // 清空现有数据
+        foreach ($repository->findAll() as $config) {
+            self::getEntityManager()->remove($config);
+        }
+        self::getEntityManager()->flush();
+
         $config = $this->createTestConfig([
             'name' => '上海区域配置',
             'regionId' => 'cn-shanghai',
         ]);
+        self::getEntityManager()->persist($config);
+        self::getEntityManager()->flush();
 
-        $mockRepo->setFindByResult([$config]);
-        $result = $mockRepo->findBy(['regionId' => 'cn-shanghai']);
-
+        $result = $repository->findBy(['regionId' => 'cn-shanghai']);
         $this->assertCount(1, $result);
         $this->assertEquals('cn-shanghai', $result[0]->getRegionId());
         $this->assertEquals('上海区域配置', $result[0]->getName());
-    }
-
-    public function testFindOneByWithOrderBy(): void
-    {
-        $mockRepo = $this->createMockRepository();
-        $config = $this->createTestConfig(['name' => 'A配置', 'valid' => true]);
-
-        $mockRepo->setFindOneByResult($config);
-        $result = $mockRepo->findOneBy(['valid' => true], ['name' => 'ASC']);
-
-        $this->assertInstanceOf(AliyunVodConfig::class, $result);
-        $this->assertEquals('A配置', $result->getName());
-    }
-
-    public function testPaginationAndComplexQueries(): void
-    {
-        $mockRepo = $this->createMockRepository();
-
-        // Create test data
-        $configs = [];
-        for ($i = 1; $i <= 5; ++$i) {
-            $configs[] = $this->createTestConfig([
-                'name' => '配置' . $i,
-                'accessKeyId' => 'LTAI4Test' . $i,
-            ]);
-        }
-
-        // Set all configs, let the repository do the slicing
-        $mockRepo->setFindByResult($configs);
-        $result = $mockRepo->findBy(['valid' => true], ['isDefault' => 'DESC', 'name' => 'ASC'], 3, 1);
-        $this->assertCount(3, $result);
-
-        // Test non-default configs
-        $mockRepo->setFindByResult([]);
-        $result = $mockRepo->findBy(['isDefault' => false, 'valid' => true]);
-        $this->assertEmpty($result);
-
-        // Test multiple region queries
-        $regions = ['cn-shanghai', 'cn-beijing', 'cn-hangzhou'];
-        foreach ($regions as $regionId) {
-            $mockRepo->setFindByResult([]);
-            $result = $mockRepo->findBy(['regionId' => $regionId]);
-            $this->assertEmpty($result);
-        }
     }
 
     /** @return ServiceEntityRepository<AliyunVodConfig> */
@@ -419,8 +426,4 @@ final class AliyunVodConfigRepositoryTest extends AbstractRepositoryTestCase
         }
     }
 
-    private function createMockRepository(): TestableRepository
-    {
-        return new TestableRepository($this->registry);
-    }
 }
