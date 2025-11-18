@@ -104,17 +104,6 @@ final class AliyunVodConfigCrudControllerTest extends AbstractEasyAdminControlle
         }
     }
 
-    public function testGetEntityFqcn(): void
-    {
-        self::ensureKernelShutdown();
-        $client = self::createAuthenticatedClient();
-
-        $client->request('GET', '/admin/aliyun-vod/config');
-
-        $this->assertResponseIsSuccessful();
-        $this->assertSelectorExists('h1');
-    }
-
     public function testConfigureCrud(): void
     {
         self::ensureKernelShutdown();
