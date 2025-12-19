@@ -16,8 +16,6 @@ use Tourze\PHPUnitSymfonyWebTest\AbstractEasyAdminControllerTestCase;
 /**
  * 阿里云VOD配置管理控制器测试
  *
- * @phpstan-ignore-next-line
- *
  * @internal
  */
 #[CoversClass(AliyunVodConfigCrudController::class)]

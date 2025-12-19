@@ -15,8 +15,6 @@ use Tourze\AliyunVodBundle\Entity\Video;
 use Tourze\PHPUnitSymfonyWebTest\AbstractEasyAdminControllerTestCase;
 
 /**
- * @phpstan-ignore-next-line
- *
  * @internal
  */
 #[CoversClass(TranscodeTaskCrudController::class)]

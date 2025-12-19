@@ -233,7 +233,6 @@ final class VideoPlayControllerTest extends AbstractWebTestCase
         $video = $this->createTestVideo();
 
         $this->expectException(MethodNotAllowedHttpException::class);
-        // @phpstan-ignore-next-line
         $client->request($method, '/admin/statistics/video-play/' . $video->getId());
     }
 }

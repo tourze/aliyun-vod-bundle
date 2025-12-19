@@ -331,8 +331,7 @@ final class AliyunVodConfigRepositoryTest extends AbstractRepositoryTestCase
         $this->assertEquals('上海区域配置', $result[0]->getName());
     }
 
-    /** @return ServiceEntityRepository<AliyunVodConfig> */
-    protected function getRepository(): ServiceEntityRepository
+    protected function getRepository(): AliyunVodConfigRepository
     {
         return self::getService(AliyunVodConfigRepository::class);
     }

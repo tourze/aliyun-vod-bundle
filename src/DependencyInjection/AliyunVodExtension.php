@@ -6,7 +6,7 @@ namespace Tourze\AliyunVodBundle\DependencyInjection;
 
 use Tourze\SymfonyDependencyServiceLoader\AutoExtension;
 
-class AliyunVodExtension extends AutoExtension
+final class AliyunVodExtension extends AutoExtension
 {
     protected function getConfigDir(): string
     {

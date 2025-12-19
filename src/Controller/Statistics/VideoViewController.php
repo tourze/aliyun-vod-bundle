@@ -26,7 +26,7 @@ final class VideoViewController extends AbstractController
     public function __invoke(Request $request): JsonResponse
     {
         try {
-            $videoId = $request->get('videoId');
+            $videoId = $request->query->get('videoId') ?? $request->request->get('videoId');
 
             if (null === $videoId) {
                 return new JsonResponse([

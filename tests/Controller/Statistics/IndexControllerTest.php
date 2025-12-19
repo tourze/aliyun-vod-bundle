@@ -145,7 +145,6 @@ final class IndexControllerTest extends AbstractWebTestCase
         $client->loginUser(new InMemoryUser('admin', 'password', ['ROLE_ADMIN']), 'main');
 
         $this->expectException(MethodNotAllowedHttpException::class);
-        // @phpstan-ignore-next-line
         $client->request($method, '/admin/statistics');
     }
 }

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tourze\AliyunVodBundle\Tests\Service;
 
-use Knp\Menu\ItemInterface;
+use Knp\Menu\MenuFactory;
+use Knp\Menu\MenuItem;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
-use PHPUnit\Framework\MockObject\MockObject;
 use Tourze\AliyunVodBundle\Entity\AliyunVodConfig;
 use Tourze\AliyunVodBundle\Entity\PlayRecord;
 use Tourze\AliyunVodBundle\Entity\TranscodeTask;
@@ -25,12 +25,30 @@ final class AdminMenuTest extends AbstractEasyAdminMenuTestCase
 {
     private AdminMenu $adminMenu;
 
-    private LinkGeneratorInterface $linkGenerator;
-
     protected function onSetUp(): void
     {
-        $this->linkGenerator = $this->createMock(LinkGeneratorInterface::class);
-        self::getContainer()->set(LinkGeneratorInterface::class, $this->linkGenerator);
+        $linkGenerator = new class implements LinkGeneratorInterface {
+            public function getCurdListPage(string $entityClass): string
+            {
+                return match ($entityClass) {
+                    AliyunVodConfig::class => '/admin/aliyun-vod-config',
+                    Video::class => '/admin/video',
+                    TranscodeTask::class => '/admin/transcode-task',
+                    PlayRecord::class => '/admin/play-record',
+                    default => '/admin/unknown',
+                };
+            }
+
+            public function extractEntityFqcn(string $url): ?string
+            {
+                return null;
+            }
+
+            public function setDashboard(string $dashboardControllerFqcn): void
+            {
+            }
+        };
+        self::getContainer()->set(LinkGeneratorInterface::class, $linkGenerator);
         $this->adminMenu = self::getService(AdminMenu::class);
     }
 
@@ -39,174 +57,91 @@ final class AdminMenuTest extends AbstractEasyAdminMenuTestCase
         return $this->adminMenu;
     }
 
-    public function testInvokeAddsVideoManagementMenu(): void
+    public function testInvokeCreatesVideoManagementMenu(): void
     {
-        $this->assertInstanceOf(AdminMenu::class, $this->adminMenu);
+        $factory = new MenuFactory();
+        $rootMenu = new MenuItem('root', $factory);
 
-        $mainItem = $this->createMock(ItemInterface::class);
-        $videoItem = $this->createMock(ItemInterface::class);
-        $configMenuItem = $this->createMock(ItemInterface::class);
-        $videoMenuItem = $this->createMock(ItemInterface::class);
-        $transcodeMenuItem = $this->createMock(ItemInterface::class);
-        $playRecordMenuItem = $this->createMock(ItemInterface::class);
+        ($this->adminMenu)($rootMenu);
 
-        // 模拟LinkGenerator行为 - 四次调用
-        $this->assertInstanceOf(MockObject::class, $this->linkGenerator);
-        $this->linkGenerator->expects($this->exactly(4))
-            ->method('getCurdListPage')
-            ->willReturnMap([
-                [AliyunVodConfig::class, '/admin/aliyun-vod-config'],
-                [Video::class, '/admin/video'],
-                [TranscodeTask::class, '/admin/transcode-task'],
-                [PlayRecord::class, '/admin/play-record'],
-            ])
-        ;
+        $videoMenu = $rootMenu->getChild('视频管理');
+        self::assertNotNull($videoMenu);
 
-        // 第一次调用 getChild 返回 null，第二次返回已创建的菜单项
-        $mainItem->expects($this->exactly(2))
-            ->method('getChild')
-            ->with('视频管理')
-            ->willReturnOnConsecutiveCalls(null, $videoItem)
-        ;
+        // 验证 VOD 配置菜单
+        $vodConfigMenu = $videoMenu->getChild('VOD配置');
+        self::assertNotNull($vodConfigMenu);
+        self::assertSame('/admin/aliyun-vod-config', $vodConfigMenu->getUri());
+        self::assertSame('fas fa-cog', $vodConfigMenu->getAttribute('icon'));
 
-        // 创建视频管理父菜单
-        $mainItem->expects($this->once())
-            ->method('addChild')
-            ->with('视频管理')
-            ->willReturn($videoItem)
-        ;
+        // 验证视频列表菜单
+        $videoListMenu = $videoMenu->getChild('视频列表');
+        self::assertNotNull($videoListMenu);
+        self::assertSame('/admin/video', $videoListMenu->getUri());
+        self::assertSame('fas fa-video', $videoListMenu->getAttribute('icon'));
 
-        // 添加四个子菜单
-        $videoItem->expects($this->exactly(4))
-            ->method('addChild')
-            ->willReturnMap([
-                ['VOD配置', [], $configMenuItem],
-                ['视频列表', [], $videoMenuItem],
-                ['转码任务', [], $transcodeMenuItem],
-                ['播放记录', [], $playRecordMenuItem],
-            ])
-        ;
+        // 验证转码任务菜单
+        $transcodeTaskMenu = $videoMenu->getChild('转码任务');
+        self::assertNotNull($transcodeTaskMenu);
+        self::assertSame('/admin/transcode-task', $transcodeTaskMenu->getUri());
+        self::assertSame('fas fa-tasks', $transcodeTaskMenu->getAttribute('icon'));
 
-        // 配置菜单项设置
-        $configMenuItem->expects($this->once())
-            ->method('setUri')
-            ->with('/admin/aliyun-vod-config')
-        ;
-        $configMenuItem->expects($this->once())
-            ->method('setAttribute')
-            ->with('icon', 'fas fa-cog')
-        ;
-
-        // 视频菜单项设置
-        $videoMenuItem->expects($this->once())
-            ->method('setUri')
-            ->with('/admin/video')
-        ;
-        $videoMenuItem->expects($this->once())
-            ->method('setAttribute')
-            ->with('icon', 'fas fa-video')
-        ;
-
-        // 转码任务菜单项设置
-        $transcodeMenuItem->expects($this->once())
-            ->method('setUri')
-            ->with('/admin/transcode-task')
-        ;
-        $transcodeMenuItem->expects($this->once())
-            ->method('setAttribute')
-            ->with('icon', 'fas fa-tasks')
-        ;
-
-        // 播放记录菜单项设置
-        $playRecordMenuItem->expects($this->once())
-            ->method('setUri')
-            ->with('/admin/play-record')
-        ;
-        $playRecordMenuItem->expects($this->once())
-            ->method('setAttribute')
-            ->with('icon', 'fas fa-play-circle')
-        ;
-
-        // 调用管理菜单
-        ($this->adminMenu)($mainItem);
+        // 验证播放记录菜单
+        $playRecordMenu = $videoMenu->getChild('播放记录');
+        self::assertNotNull($playRecordMenu);
+        self::assertSame('/admin/play-record', $playRecordMenu->getUri());
+        self::assertSame('fas fa-play-circle', $playRecordMenu->getAttribute('icon'));
     }
 
-    public function testInvokeWithExistingVideoManagementMenu(): void
+    public function testInvokeUsesExistingVideoManagementMenu(): void
     {
-        $mainItem = $this->createMock(ItemInterface::class);
-        $videoItem = $this->createMock(ItemInterface::class);
-        $configMenuItem = $this->createMock(ItemInterface::class);
-        $videoMenuItem = $this->createMock(ItemInterface::class);
-        $transcodeMenuItem = $this->createMock(ItemInterface::class);
-        $playRecordMenuItem = $this->createMock(ItemInterface::class);
+        $factory = new MenuFactory();
+        $rootMenu = new MenuItem('root', $factory);
+        $existingVideoMenu = $rootMenu->addChild('视频管理');
 
-        // 模拟LinkGenerator行为
-        $this->assertInstanceOf(MockObject::class, $this->linkGenerator);
-        $this->linkGenerator->expects($this->exactly(4))
-            ->method('getCurdListPage')
-            ->willReturnMap([
-                [AliyunVodConfig::class, '/admin/aliyun-vod-config'],
-                [Video::class, '/admin/video'],
-                [TranscodeTask::class, '/admin/transcode-task'],
-                [PlayRecord::class, '/admin/play-record'],
-            ])
-        ;
+        ($this->adminMenu)($rootMenu);
 
-        // 两次调用 getChild 都返回已存在的菜单项
-        $mainItem->expects($this->exactly(2))
-            ->method('getChild')
-            ->with('视频管理')
-            ->willReturn($videoItem)
-        ;
+        $videoMenu = $rootMenu->getChild('视频管理');
+        self::assertSame($existingVideoMenu, $videoMenu);
 
-        // 不应该创建新的父菜单
-        $mainItem->expects($this->never())
-            ->method('addChild')
-        ;
+        // 验证子菜单仍然被创建
+        $vodConfigMenu = $videoMenu->getChild('VOD配置');
+        self::assertNotNull($vodConfigMenu);
+        self::assertSame('/admin/aliyun-vod-config', $vodConfigMenu->getUri());
 
-        // 添加四个子菜单
-        $videoItem->expects($this->exactly(4))
-            ->method('addChild')
-            ->willReturnMap([
-                ['VOD配置', [], $configMenuItem],
-                ['视频列表', [], $videoMenuItem],
-                ['转码任务', [], $transcodeMenuItem],
-                ['播放记录', [], $playRecordMenuItem],
-            ])
-        ;
+        $videoListMenu = $videoMenu->getChild('视频列表');
+        self::assertNotNull($videoListMenu);
+        self::assertSame('/admin/video', $videoListMenu->getUri());
 
-        // 设置菜单项属性
+        $transcodeTaskMenu = $videoMenu->getChild('转码任务');
+        self::assertNotNull($transcodeTaskMenu);
+        self::assertSame('/admin/transcode-task', $transcodeTaskMenu->getUri());
 
-        // 调用管理菜单
-        ($this->adminMenu)($mainItem);
+        $playRecordMenu = $videoMenu->getChild('播放记录');
+        self::assertNotNull($playRecordMenu);
+        self::assertSame('/admin/play-record', $playRecordMenu->getUri());
     }
 
-    public function testInvokeReturnsEarlyWhenVideoMenuIsNull(): void
+    public function testMenuItemsHaveCorrectIcons(): void
     {
-        $mainItem = $this->createMock(ItemInterface::class);
-        $nullMenuItem = $this->createMock(ItemInterface::class);
+        $factory = new MenuFactory();
+        $rootMenu = new MenuItem('root', $factory);
 
-        // 第一次调用 getChild 返回 null，第二次也返回 null
-        $mainItem->expects($this->exactly(2))
-            ->method('getChild')
-            ->with('视频管理')
-            ->willReturnOnConsecutiveCalls(null, null)
-        ;
+        ($this->adminMenu)($rootMenu);
 
-        // 创建视频管理父菜单但getChild仍返回null（模拟创建失败的情况）
-        $mainItem->expects($this->once())
-            ->method('addChild')
-            ->with('视频管理')
-            ->willReturn($nullMenuItem)
-        ;
+        $videoMenu = $rootMenu->getChild('视频管理');
+        self::assertNotNull($videoMenu);
 
-        // LinkGenerator不应该被调用
-        $this->assertInstanceOf(MockObject::class, $this->linkGenerator);
-        $this->linkGenerator->expects($this->never())
-            ->method('getCurdListPage')
-        ;
+        $expectedIcons = [
+            'VOD配置' => 'fas fa-cog',
+            '视频列表' => 'fas fa-video',
+            '转码任务' => 'fas fa-tasks',
+            '播放记录' => 'fas fa-play-circle',
+        ];
 
-        // 调用管理菜单
-        ($this->adminMenu)($mainItem);
+        foreach ($expectedIcons as $menuName => $expectedIcon) {
+            $menuItem = $videoMenu->getChild($menuName);
+            self::assertNotNull($menuItem, sprintf('菜单项 "%s" 应该存在', $menuName));
+            self::assertSame($expectedIcon, $menuItem->getAttribute('icon'), sprintf('菜单项 "%s" 的图标应该是 "%s"', $menuName, $expectedIcon));
+        }
     }
 }
